@@ -1,0 +1,95 @@
+# =========================
+# .NET / ASP.NET Core
+# =========================
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+out/
+artifacts/
+
+# Build results / logs
+*.log
+
+# =========================
+# User-specific files
+# =========================
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =========================
+# JetBrains Rider / IntelliJ
+# =========================
+.idea/
+*.sln.iml
+
+# Rider/Resharper caches (occasionally appear)
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# =========================
+# VS Code (if used)
+# =========================
+.vscode/
+
+# =========================
+# OS / tooling noise
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# ASP.NET Core local settings
+# =========================
+**/appsettings.*.Development.json
+**/appsettings.*.Local.json
+
+# =========================
+# Environment files (DotNetEnv, docker-compose, etc.)
+# =========================
+.env
+.env.*
+!.env.example
+!.env.template
+
+# =========================
+# Secrets & certificates
+# =========================
+**/*.pfx
+**/*.p12
+**/*.key
+**/*.crt
+**/*.pem
+
+# =========================
+# Coverage / test outputs
+# =========================
+TestResults/
+**/TestResults/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+*.trx
+
+# =========================
+# NuGet packages (usually keep ignored; restore will fetch)
+# =========================
+# If you prefer to commit packages for some reason, remove these:
+**/packages/
+*.nupkg
+*.snupkg
+
+# =========================
+# Publish outputs
+# =========================
+**/publish/
+**/wwwroot/dist/
+
+# =========================
+# Docker override files (often local-only)
+# =========================
+docker-compose.override.yml
