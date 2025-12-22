@@ -1,4 +1,7 @@
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using NextHome.Core.Interfaces;
+using NextHome.Infrastructure;
 using NextHome.Infrastructure.Extensions;
 using NextHome.Infrastructure.Repositories;
 
@@ -34,6 +37,7 @@ public static class ServiceCollectionExtension
             cfg.RegisterServicesFromAssembly(
                 applicationAssembly));
 
+        // TODO: add auth for swagger
         // Swagger
         services.AddSwaggerGen();
         
@@ -41,6 +45,23 @@ public static class ServiceCollectionExtension
         services.AddInfrastructure(configuration);
         
         services.AddScoped<IUserRepository, UserRepository>();
+        
+        // JWT
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.TokenValidationParameters = new()
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!))
+                };
+            });
+        
+
 
         return services;
     }

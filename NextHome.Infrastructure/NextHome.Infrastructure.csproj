@@ -16,7 +16,18 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.IdentityModel.JsonWebTokens">
+        <HintPath>..\..\..\.nuget\packages\microsoft.identitymodel.jsonwebtokens\8.14.0\lib\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.IdentityModel.Tokens">
+        <HintPath>..\..\..\.nuget\packages\microsoft.identitymodel.tokens\8.14.0\lib\net9.0\Microsoft.IdentityModel.Tokens.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

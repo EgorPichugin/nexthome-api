@@ -1,3 +1,5 @@
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using NextHome.API.Extensions;
 
 public class Program
@@ -6,6 +8,7 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.ConfigureServices(builder.Configuration);
+        
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.ConfigureCors();

@@ -25,6 +25,9 @@ public static class WebApplicationExtension
         app.UseAuthorization();
         app.MapControllers();
         app.UseMiddleware<ExceptionMiddleware>();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        
         return app;
     }
 }

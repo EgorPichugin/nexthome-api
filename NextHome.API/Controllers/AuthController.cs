@@ -17,7 +17,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     }
     
     [HttpPost("login")]
-    public async Task<ActionResult<UserResponse>> Login([FromBody] LoginCommand command)
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginCommand command)
     {
         try
         {
