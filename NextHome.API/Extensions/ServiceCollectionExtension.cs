@@ -1,3 +1,7 @@
+using NextHome.Core.Interfaces;
+using NextHome.Infrastructure.Extensions;
+using NextHome.Infrastructure.Repositories;
+
 namespace NextHome.API.Extensions;
 
 /// <summary>
@@ -9,8 +13,9 @@ public static class ServiceCollectionExtension
     /// Configure services.
     /// </summary>
     /// <param name="services">The IServiceCollection to which the CORS configuration will be added.</param>
+    /// <param name="configuration">Builder configuration object.</param>
     /// <returns>The IServiceCollection with the CORS configuration applied.</returns>
-    public static IServiceCollection ConfigureServices(this IServiceCollection services)
+    public static IServiceCollection ConfigureServices(this IServiceCollection services, ConfigurationManager configuration)
     {
         // Register all classes as scoped
         var currentAssembly = AssemblyReference.CurrentAssembly;
@@ -32,6 +37,11 @@ public static class ServiceCollectionExtension
         // Swagger
         services.AddSwaggerGen();
         
+        // Db context
+        services.AddInfrastructure(configuration);
+        
+        services.AddScoped<IUserRepository, UserRepository>();
+
         return services;
     }
 

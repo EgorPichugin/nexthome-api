@@ -29,7 +29,7 @@ public static class EnvironmentManager
     /// <summary>
     /// Get required environment variable.
     /// </summary>
-    /// <param name="key">The name of environment variable.</param>
+    /// <param name="key">The name of the environment variable.</param>
     /// <returns>Value from .env file.</returns>
     /// <exception cref="InvalidOperationException"></exception>
     private static string GetRequired(string key)

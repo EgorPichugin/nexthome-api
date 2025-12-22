@@ -5,7 +5,7 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Services.ConfigureServices();
+        builder.Services.ConfigureServices(builder.Configuration);
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.ConfigureCors();
