@@ -22,11 +22,10 @@ public static class WebApplicationExtension
             app.UseHttpsRedirection();
         }
         
-        app.UseAuthorization();
-        app.MapControllers();
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.MapControllers();
         
         return app;
     }

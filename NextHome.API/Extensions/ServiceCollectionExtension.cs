@@ -1,5 +1,7 @@
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using NextHome.Core.Interfaces;
 using NextHome.Infrastructure;
 using NextHome.Infrastructure.Extensions;
@@ -37,31 +39,56 @@ public static class ServiceCollectionExtension
             cfg.RegisterServicesFromAssembly(
                 applicationAssembly));
 
-        // TODO: add auth for swagger
         // Swagger
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Provide JWT: Bearer {token}"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
         
         // Db context
         services.AddInfrastructure(configuration);
-        
         services.AddScoped<IUserRepository, UserRepository>();
         
         // JWT
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.AddAuthentication("Bearer")
-            .AddJwtBearer("Bearer", options =>
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new()
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    IssuerSigningKey =
-                        new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!))
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)
+                    ),
+                    ValidateLifetime = true
                 };
             });
-        
-
 
         return services;
     }

@@ -11,8 +11,7 @@ namespace NextHome.API.Controllers;
 [Route("api/[controller]")]
 public class UsersController(IMediator mediator) : ControllerBase
 {
-    // TODO: uncomment it later when auth for swagger works
-    // [Authorize]
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<UserResponse>> GetAll(CancellationToken cancellationToken)
     {
