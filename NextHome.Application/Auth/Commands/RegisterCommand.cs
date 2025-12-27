@@ -4,6 +4,8 @@ using NextHome.Core.Entities;
 using NextHome.Core.Interfaces;
 using NextHome.Infrastructure;
 using System.Net.Mail;
+using NextHome.Application.Common.Exceptions;
+
 namespace NextHome.Application.Auth.Commands;
 
 /// <summary>
@@ -31,7 +33,7 @@ public class RegisterCommandHandler(IUserRepository userRepository) : IRequestHa
         var errors = ValidateRequest(request);
         if (errors.Any())
         {
-            throw new ArgumentException(string.Join(" ", errors));
+            throw new ValidationException(errors);
         }
 
         if (await userRepository.Exists(request.Email, cancellationToken))
@@ -58,7 +60,7 @@ public class RegisterCommandHandler(IUserRepository userRepository) : IRequestHa
             user.FirstName,
             user.LastName
         );
-    }
+     }
 
     private static List<string> ValidateRequest(RegisterCommand request)
     {

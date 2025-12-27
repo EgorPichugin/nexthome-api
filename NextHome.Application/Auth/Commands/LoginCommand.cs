@@ -16,18 +16,15 @@ public class LoginCommandHandler(IUserRepository userRepository, IJwtTokenGenera
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByEmail(request.Email, cancellationToken) ?? 
-                   throw new UnauthorizedAccessException("Invalid credentials.");
+                   throw new ArgumentException("Invalid email or password.");
 
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            throw new UnauthorizedAccessException("Invalid credentials.");
+            throw new ArgumentException("Invalid email or password.");
 
         var token = jwtTokenGenerator.GenerateToken(user.Id, user.Email);
 
         return new LoginResponse(
-            user.Id,
-            user.Email,
-            user.FirstName,
-            user.LastName,
+            new UserResponse(user.Id, user.Email, user.FirstName, user.LastName),
             token
         );
     }
