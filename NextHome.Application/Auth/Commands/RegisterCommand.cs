@@ -5,6 +5,7 @@ using NextHome.Core.Interfaces;
 using NextHome.Infrastructure;
 using System.Net.Mail;
 using NextHome.Application.Common.Exceptions;
+using NextHome.Core.Enumerations;
 
 namespace NextHome.Application.Auth.Commands;
 
@@ -15,11 +16,19 @@ namespace NextHome.Application.Auth.Commands;
 /// <param name="Password">The password for the user account.</param>
 /// <param name="FirstName">The first name of the user.</param>
 /// <param name="LastName">The last name of the user.</param>
+/// <param name="Country">The country to where the user immigrated.</param>
+/// <param name="City">The city where the user lives.</param>
+/// <param name="Status">The immigrant status.</param>
+/// <param name="ImmigrationDate">The immigration date.</param>
 public record RegisterCommand(
     string Email,
     string Password,
     string FirstName,
-    string LastName
+    string LastName,
+    string Country,
+    string City,
+    EStatus? Status = null,
+    DateTime? ImmigrationDate = null
 ) : IRequest<UserResponse>;
 
 /// <summary>
@@ -40,8 +49,9 @@ public class RegisterCommandHandler(IUserRepository userRepository) : IRequestHa
         {
             throw new InvalidOperationException($"User with email {request.Email} already exists.");
         }
+
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        
+
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -49,18 +59,26 @@ public class RegisterCommandHandler(IUserRepository userRepository) : IRequestHa
             PasswordHash = passwordHash,
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
+            Country = request.Country.Trim(),
+            City = request.City?.Trim(),
+            Status = request.Status,
+            ImmigrationDate = request.ImmigrationDate,
             CreatedAt = DateTime.UtcNow
         };
-        
-        await userRepository.Add(user, cancellationToken);
-        
+
+        var userEntity = await userRepository.Add(user, cancellationToken);
+
         return new UserResponse(
-            user.Id,
-            user.Email,
-            user.FirstName,
-            user.LastName
+            userEntity.Id,
+            userEntity.Email,
+            userEntity.FirstName,
+            userEntity.LastName,
+            userEntity.Country,
+            userEntity.City,
+            userEntity.Status,
+            userEntity.ImmigrationDate
         );
-     }
+    }
 
     private static List<string> ValidateRequest(RegisterCommand request)
     {
@@ -78,6 +96,9 @@ public class RegisterCommandHandler(IUserRepository userRepository) : IRequestHa
         if (!IsValidPassword(request.Password))
             errors.Add("Password must be at least 8 characters long.");
 
+        if (!IsValidCountry(request.Country))
+            errors.Add("Invalid country.");
+
         return errors;
     }
 
@@ -90,13 +111,18 @@ public class RegisterCommandHandler(IUserRepository userRepository) : IRequestHa
     {
         return !string.IsNullOrWhiteSpace(surname);
     }
-    
+
     private static bool IsValidPassword(string password)
     {
         if (string.IsNullOrWhiteSpace(password)) return false;
         return password.Length >= 8;
     }
-    
+
+    private static bool IsValidCountry(string country)
+    {
+        return !string.IsNullOrWhiteSpace(country);
+    }
+
     private static bool IsValidEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email)) return false;

@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NextHome.Application.Extensions;
 using NextHome.Core.Interfaces;
 using NextHome.Infrastructure;
 using NextHome.Infrastructure.Extensions;
@@ -68,9 +69,12 @@ public static class ServiceCollectionExtension
             });
         });
         
-        // Db context
+        // Infrastructure services
         services.AddInfrastructure(configuration);
         services.AddScoped<IUserRepository, UserRepository>();
+        
+        // Application services
+        services.AddApplication();
         
         // JWT
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
