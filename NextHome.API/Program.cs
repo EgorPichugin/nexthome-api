@@ -2,6 +2,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using NextHome.API.Extensions;
 
+namespace NextHome.API;
+
 public class Program
 {
     public static void Main(string[] args)

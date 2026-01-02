@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NextHome.Application.Common.Validation;
 using NextHome.Application.Countries.Services;
 using NextHome.Infrastructure.Persistence;
 
@@ -12,6 +13,7 @@ public static class ServiceCollectionExtension
         this IServiceCollection services)
     {
         services.AddScoped<ICsvReaderService, CsvReaderService>();
+        services.AddScoped<IUserValidationService, UserValidationService>();
 
         return services;
     }

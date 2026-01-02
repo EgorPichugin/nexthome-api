@@ -1,3 +1,4 @@
+using NextHome.API.Constants;
 using NextHome.API.Middleware;
 
 namespace NextHome.API.Extensions;
@@ -17,7 +18,10 @@ public static class WebApplicationExtension
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint($"/swagger/{SwaggerDocs.ApiVersion}/swagger.json", SwaggerDocs.ApiName);
+            });
             app.UseCors(EnvironmentManager.CorsPolicyName);
             app.UseHttpsRedirection();
         }

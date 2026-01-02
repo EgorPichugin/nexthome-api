@@ -5,7 +5,7 @@ namespace NextHome.Core.Entities;
 /// <summary>
 /// Represents a user.
 /// </summary>
-public class User
+public class UserEntity
 {
     /// <summary>
     /// Unique identifier of the user.
@@ -60,5 +60,5 @@ public class User
     /// <summary>
     /// Experience cards associated with the user.
     /// </summary>
-    public ICollection<ExperienceCard> ExperienceCards { get; init; } = [];
+    public ICollection<ExperienceCardEntity> ExperienceCards { get; init; } = [];
 }

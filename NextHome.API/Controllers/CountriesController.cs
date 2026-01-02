@@ -14,7 +14,7 @@ public class CountriesController(IMediator mediator) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<CountryResponse>>> GetAll(CancellationToken cancellationToken)
     {
-        var response = await mediator.Send(new GetAllCountries(), cancellationToken);
+        var response = await mediator.Send(new GetAllCountriesQuery(), cancellationToken);
         return Ok(response);
     }
 }

@@ -8,7 +8,7 @@ namespace NextHome.Infrastructure.Persistence;
 /// </summary>
 public interface IAppDbContext
 {
-    DbSet<User> Users { get; }
+    DbSet<UserEntity> Users { get; }
 }
 
 /// <summary>
@@ -16,14 +16,14 @@ public interface IAppDbContext
 /// </summary>
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
 {
-    public DbSet<User> Users => Set<User>();
-    public DbSet<ExperienceCard> ExperienceCards => Set<ExperienceCard>();
+    public DbSet<UserEntity> Users => Set<UserEntity>();
+    public DbSet<ExperienceCardEntity> ExperienceCards => Set<ExperienceCardEntity>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<ExperienceCard>(entity =>
+        modelBuilder.Entity<ExperienceCardEntity>(entity =>
         {
             entity.HasKey(x => x.Id);
 

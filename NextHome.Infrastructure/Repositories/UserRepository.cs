@@ -9,15 +9,15 @@ namespace NextHome.Infrastructure.Repositories;
 public sealed class UserRepository(AppDbContext appDbContext) : IUserRepository
 {
     /// <inheritdoc/>
-    public async Task<User> Add(User user, CancellationToken cancellationToken = default)
+    public async Task<UserEntity> Add(UserEntity userEntity, CancellationToken cancellationToken = default)
     {
-        appDbContext.Users.Add(user);
+        appDbContext.Users.Add(userEntity);
         await appDbContext.SaveChangesAsync(cancellationToken);
-        return user;
+        return userEntity;
     }
 
     /// <inheritdoc/>
-    public Task<User?> GetById(Guid id, CancellationToken cancellationToken = default)
+    public Task<UserEntity?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         return appDbContext.Users.FirstOrDefaultAsync(
             user => user.Id == id,
@@ -26,7 +26,7 @@ public sealed class UserRepository(AppDbContext appDbContext) : IUserRepository
     }
 
     /// <inheritdoc/>
-    public Task<User?> GetByEmail(string email, CancellationToken cancellationToken = default)
+    public Task<UserEntity?> GetByEmail(string email, CancellationToken cancellationToken = default)
     {
         return appDbContext.Users.FirstOrDefaultAsync(
             user => user.Email == email,
@@ -35,7 +35,7 @@ public sealed class UserRepository(AppDbContext appDbContext) : IUserRepository
     }
 
     /// <inheritdoc/>
-    public Task<List<User>> GetAll(CancellationToken cancellationToken = default)
+    public Task<List<UserEntity>> GetAll(CancellationToken cancellationToken = default)
     {
         return appDbContext.Users.ToListAsync(cancellationToken);
     }
@@ -50,9 +50,11 @@ public sealed class UserRepository(AppDbContext appDbContext) : IUserRepository
     }
 
     /// <inheritdoc/>
-    public async Task Update(User user, CancellationToken cancellationToken = default)
+    public async Task Update(UserEntity userEntity, CancellationToken cancellationToken = default)
     {
-        appDbContext.Users.Update(user);
+        appDbContext.Users.Update(userEntity);
         await appDbContext.SaveChangesAsync(cancellationToken);
     }
+
+    
 }

@@ -5,7 +5,7 @@ namespace NextHome.Application.Auth.Responses;
 /// </summary>
 /// <param name="User">Authorised user.</param>
 /// <param name="AccessToken">User access token.</param>
-public record LoginResponse(
+public record LoginUserResponse(
     UserResponse User,
     string AccessToken
 );

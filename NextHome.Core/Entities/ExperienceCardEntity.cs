@@ -3,7 +3,7 @@ namespace NextHome.Core.Entities;
 /// <summary>
 /// Represents an experience card.
 /// </summary>
-public record ExperienceCard
+public record ExperienceCardEntity
 {
     /// <summary>
     /// Gets the unique identifier for the experience card.
@@ -18,7 +18,7 @@ public record ExperienceCard
     /// <summary>
     /// Gets the user associated with the experience card.
     /// </summary>
-    public User? User { get; init; }
+    public required UserEntity User { get; init; }
 
     /// <summary>
     /// Gets the title of the experience card.

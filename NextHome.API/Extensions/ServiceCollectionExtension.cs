@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NextHome.API.Constants;
 using NextHome.Application.Extensions;
 using NextHome.Core.Interfaces;
 using NextHome.Infrastructure;
@@ -34,6 +35,7 @@ public static class ServiceCollectionExtension
         
         // Add framework services.
         services.AddControllers();
+        services.AddEndpointsApiExplorer();
         
         // MediatR
         services.AddMediatR(cfg =>
@@ -43,6 +45,14 @@ public static class ServiceCollectionExtension
         // Swagger
         services.AddSwaggerGen(options =>
         {
+            options.SwaggerDoc(SwaggerDocs.ApiVersion, new OpenApiInfo
+            {
+                Title = SwaggerDocs.ApiName,
+                Version = SwaggerDocs.ApiVersion
+            });
+            
+            options.CustomSchemaIds(description => description.FullName);
+            
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
@@ -72,6 +82,7 @@ public static class ServiceCollectionExtension
         // Infrastructure services
         services.AddInfrastructure(configuration);
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IExperienceCardRepository, ExperienceCardRepository>();
         
         // Application services
         services.AddApplication();
