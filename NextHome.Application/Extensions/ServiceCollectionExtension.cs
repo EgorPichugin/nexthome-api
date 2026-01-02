@@ -14,6 +14,7 @@ public static class ServiceCollectionExtension
     {
         services.AddScoped<ICsvReaderService, CsvReaderService>();
         services.AddScoped<IUserValidationService, UserValidationService>();
+        services.AddScoped<IExperienceCardValidationService, ExperienceCardValidationService>();
 
         return services;
     }

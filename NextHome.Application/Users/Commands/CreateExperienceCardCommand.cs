@@ -1,4 +1,6 @@
 using MediatR;
+using NextHome.Application.Common.Exceptions;
+using NextHome.Application.Common.Validation;
 using NextHome.Application.Users.Responses;
 using NextHome.Core.Entities;
 using NextHome.Core.Interfaces;
@@ -34,17 +36,25 @@ public record CreateExperienceCardCommand(
 /// </summary>
 /// <param name="experienceCardRepository">The repository responsible for managing experience card entities.</param>
 /// <param name="userRepository">The repository responsible for managing and retrieving user entities.</param>
-public class PutExperienceCardHandler(
+/// <param name="experienceCardValidationService">The service that validates experience card information.</param>
+public class CreateExperienceCardHandler(
     IExperienceCardRepository experienceCardRepository,
-    IUserRepository userRepository) : IRequestHandler<CreateExperienceCardCommand, ExperienceCardResponse>
+    IUserRepository userRepository,
+    IExperienceCardValidationService experienceCardValidationService) : IRequestHandler<CreateExperienceCardCommand, ExperienceCardResponse>
 {
     /// <inheritdoc/>
-    public async Task<ExperienceCardResponse> Handle(CreateExperienceCardCommand request, CancellationToken cancellationToken)
+    public async Task<ExperienceCardResponse> Handle(CreateExperienceCardCommand command, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetById(request.UserId, cancellationToken);
+        var user = await userRepository.GetById(command.UserId, cancellationToken);
         if (user is null)
         {
             throw new ArgumentException("User not found");
+        }
+        
+        var errors = experienceCardValidationService.Validate(command.Request);
+        if (errors.Any())
+        {
+            throw new ValidationException(errors);
         }
         
         var cardEntity = new ExperienceCardEntity
@@ -52,8 +62,9 @@ public class PutExperienceCardHandler(
             Id = Guid.NewGuid(),
             User = user,
             UserId = user.Id,
-            Title = request.Request.Title,
-            Description = request.Request.Description
+            Title = command.Request.Title,
+            Description = command.Request.Description,
+            CreatedAt = DateTime.UtcNow
         };
         var response = await experienceCardRepository.Add(cardEntity, cancellationToken);
         

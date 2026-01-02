@@ -38,4 +38,47 @@ public interface IExperienceCardRepository
     /// </returns>
     Task<List<ExperienceCardEntity>> GetExperienceCardsByUserId(Guid userId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves an experience card from the repository based on the specified identifier.
+    /// </summary>
+    /// <param name="id">
+    /// The unique identifier of the experience card to retrieve.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A cancellation token to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains the experience card entity if found; otherwise, null.
+    /// </returns>
+    Task<ExperienceCardEntity?> GetById(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing experience card in the repository with new details.
+    /// </summary>
+    /// <param name="experienceCardEntity">
+    /// The experience card entity containing updated information. This includes properties such as Title, Description, and associated UserId.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A cancellation token to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains the updated experience card entity with the applied changes.
+    /// </returns>
+    Task Update(ExperienceCardEntity experienceCardEntity, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes an experience card from the repository based on the provided identifier.
+    /// </summary>
+    /// <param name="id">
+    /// The unique identifier of the experience card to be deleted.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// A cancellation token to observe while waiting for the task to complete.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task completes once the experience card
+    /// is successfully deleted from the repository.
+    /// </returns>
+    Task Delete(Guid id, CancellationToken cancellationToken = default);
 }

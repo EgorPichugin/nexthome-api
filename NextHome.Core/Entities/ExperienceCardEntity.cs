@@ -23,10 +23,15 @@ public record ExperienceCardEntity
     /// <summary>
     /// Gets the title of the experience card.
     /// </summary>
-    public required string Title { get; init; }
+    public required string Title { get; set; }
 
     /// <summary>
     /// Gets the detailed description of the experience card.
     /// </summary>
-    public required string Description { get; init; }
+    public required string Description { get; set; }
+    
+    /// <summary>
+    /// Date and time when the card was created.
+    /// </summary>
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 }
