@@ -83,6 +83,7 @@ public static class ServiceCollectionExtension
         services.AddInfrastructure(configuration);
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IExperienceCardRepository, ExperienceCardRepository>();
+        services.AddScoped<IChallengeCardRepository, ChallengeCardRepository>();
         
         // Application services
         services.AddApplication();

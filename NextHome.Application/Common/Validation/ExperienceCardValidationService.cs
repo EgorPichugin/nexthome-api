@@ -1,4 +1,5 @@
 using NextHome.Application.Users.Commands;
+using NextHome.Application.Users.Interfaces;
 using NextHome.Core.Interfaces;
 
 namespace NextHome.Application.Common.Validation;
@@ -6,46 +7,27 @@ namespace NextHome.Application.Common.Validation;
 /// <summary>
 /// Defines a service for validating experience card information provided in user-related operations.
 /// </summary>
-public interface IExperienceCardValidationService
+public interface ICardValidationService
 {
     /// <summary>
-    /// Validates the provided experience card information for a specific user, ensuring that the user and card exist
+    /// Validates the provided card information for a specific user, ensuring that the user and card exist
     /// and the input data conforms to validation rules.
     /// </summary>
-    /// <param name="request">The request containing the updated data for the experience card.</param>
+    /// <param name="request">The request containing the card request data.</param>
     /// <returns>A list of validation error messages if the validation fails; an empty list if the validation is successful.</returns>
-    List<string> Validate(UpdateExperienceCardRequest request);
-
-    /// <summary>
-    /// Validates the provided create experience card request, ensuring the data adheres to the required business rules
-    /// and contains valid values before creating an experience card.
-    /// </summary>
-    /// <param name="request">The request object containing the details for the experience card, such as title and description.</param>
-    /// <returns>A list of error messages indicating validation failures. If the validation passes, returns an empty list.</returns>
-    List<string> Validate(CreateExperienceCardRequest request);
+    List<string> Validate(ICardRequest request);
 }
 
 /// <inheritdoc />
-public class ExperienceCardValidationService : IExperienceCardValidationService
+public class CardValidationService : ICardValidationService
 {
     /// <inheritdoc/>
-    public List<string> Validate(UpdateExperienceCardRequest request)
-    {
-        return GetErrorsForFields(request.Title, request.Description);
-    }
-
-    public List<string> Validate(CreateExperienceCardRequest request)
-    {
-        return GetErrorsForFields(request.Title, request.Description);
-    }
-
-
-    private static List<string> GetErrorsForFields(string title, string description)
+    public List<string> Validate(ICardRequest request)
     {
         var errors = new List<string>();
         
-        if (!IsValidTitle(title)) errors.Add("Title is required.");
-        if (!IsValidDescription(description)) errors.Add("Description is required.");
+        if (!IsValidTitle(request.Title)) errors.Add("Title is required.");
+        if (!IsValidDescription(request.Description)) errors.Add("Description is required.");
         
         return errors;
     }

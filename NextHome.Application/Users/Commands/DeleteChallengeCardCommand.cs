@@ -4,27 +4,27 @@ using NextHome.Core.Interfaces;
 namespace NextHome.Application.Users.Commands;
 
 /// <summary>
-/// Command to delete an experience card for a user.
+/// Command to delete a challenge card for a user.
 /// </summary>
 /// <param name="UserId">The identifier of the user who owns the card.</param>
 /// <param name="CardId">The identifier of the card.</param>
-public record DeleteExperienceCardCommand(
+public record DeleteChallengeCardCommand(
     Guid UserId,
     Guid CardId
 ) : IRequest<Unit>;
 
 /// <summary>
-/// Handles the execution of the DeleteExperienceCardCommand, which deletes an experience card.
+/// Handles the execution of the DeleteChallengeCardCommand, which deletes a challenge card.
 /// </summary>
-/// <param name="experienceCardRepository">The repository used to access and delete experience card entities.</param>
+/// <param name="challengeCardRepository">The repository used to access and delete challenge card entities.</param>
 /// <param name="userRepository">The repository used to verify the existence of the user associated with the card.</param>
-public class DeleteExperienceCardCommandHandler(
-    IExperienceCardRepository experienceCardRepository,
+public class DeleteChallengeCardCommandHandler(
+    IChallengeCardRepository challengeCardRepository,
     IUserRepository userRepository)
-    : IRequestHandler<DeleteExperienceCardCommand, Unit>
+    : IRequestHandler<DeleteChallengeCardCommand, Unit>
 {
     /// <inheritdoc/>
-    public async Task<Unit> Handle(DeleteExperienceCardCommand command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(DeleteChallengeCardCommand command, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetById(command.UserId, cancellationToken);
         if (user is null)
@@ -32,13 +32,13 @@ public class DeleteExperienceCardCommandHandler(
             throw new ArgumentException("User not found");
         }
 
-        var card = await experienceCardRepository.GetById(command.CardId, cancellationToken);
+        var card = await challengeCardRepository.GetById(command.CardId, cancellationToken);
         if (card is null)
         {
             throw new ArgumentException("Card not found");
         }
 
-        await experienceCardRepository.Delete(command.CardId, cancellationToken);
+        await challengeCardRepository.Delete(command.CardId, cancellationToken);
 
         return Unit.Value;
     }

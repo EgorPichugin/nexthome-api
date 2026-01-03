@@ -1,6 +1,7 @@
 using MediatR;
 using NextHome.Application.Common.Exceptions;
 using NextHome.Application.Common.Validation;
+using NextHome.Application.Users.Interfaces;
 using NextHome.Application.Users.Responses;
 using NextHome.Core.Entities;
 using NextHome.Core.Interfaces;
@@ -17,7 +18,7 @@ namespace NextHome.Application.Users.Commands;
 public record CreateExperienceCardRequest(
     string Title,
     string Description
-);
+) : ICreateCardRequest;
 
 /// <summary>
 /// Command to create an experience card for a specific user. This command encapsulates the user's identifier
@@ -36,27 +37,28 @@ public record CreateExperienceCardCommand(
 /// </summary>
 /// <param name="experienceCardRepository">The repository responsible for managing experience card entities.</param>
 /// <param name="userRepository">The repository responsible for managing and retrieving user entities.</param>
-/// <param name="experienceCardValidationService">The service that validates experience card information.</param>
+/// <param name="cardValidationService">The service that validates experience card information.</param>
 public class CreateExperienceCardHandler(
     IExperienceCardRepository experienceCardRepository,
     IUserRepository userRepository,
-    IExperienceCardValidationService experienceCardValidationService) : IRequestHandler<CreateExperienceCardCommand, ExperienceCardResponse>
+    ICardValidationService cardValidationService) : IRequestHandler<CreateExperienceCardCommand, ExperienceCardResponse>
 {
     /// <inheritdoc/>
-    public async Task<ExperienceCardResponse> Handle(CreateExperienceCardCommand command, CancellationToken cancellationToken)
+    public async Task<ExperienceCardResponse> Handle(CreateExperienceCardCommand command,
+        CancellationToken cancellationToken)
     {
         var user = await userRepository.GetById(command.UserId, cancellationToken);
         if (user is null)
         {
             throw new ArgumentException("User not found");
         }
-        
-        var errors = experienceCardValidationService.Validate(command.Request);
+
+        var errors = cardValidationService.Validate(command.Request);
         if (errors.Any())
         {
             throw new ValidationException(errors);
         }
-        
+
         var cardEntity = new ExperienceCardEntity
         {
             Id = Guid.NewGuid(),
@@ -67,7 +69,7 @@ public class CreateExperienceCardHandler(
             CreatedAt = DateTime.UtcNow
         };
         var response = await experienceCardRepository.Add(cardEntity, cancellationToken);
-        
+
         return new ExperienceCardResponse(response.Id, response.Title, response.Description);
     }
 }

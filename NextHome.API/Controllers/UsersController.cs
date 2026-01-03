@@ -12,6 +12,7 @@ namespace NextHome.API.Controllers;
 [Route("api/[controller]")]
 public class UsersController(IMediator mediator) : ControllerBase
 {
+    //region User
     [Authorize]
     [HttpGet]
     public async Task<ActionResult<UserResponse>> GetAll(CancellationToken cancellationToken)
@@ -30,6 +31,7 @@ public class UsersController(IMediator mediator) : ControllerBase
         var response = await mediator.Send(new UpdateUserCommand(id, request), cancellationToken);
         return Ok(response);
     }
+    //endregion
     
     //region Experience cards
     [Authorize]
@@ -73,6 +75,64 @@ public class UsersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var response = await mediator.Send(new DeleteExperienceCardCommand(id, cardId), cancellationToken);
+        return NoContent();
+    }
+    //endregion
+    
+    //region Challenge cards
+    [Authorize]
+    [HttpPost("{id:guid}/cards/challenge")]
+    public async Task<ActionResult<List<ChallengeCardResponse>>> CreateChallengeCard(
+        [FromRoute] Guid id,
+        [FromBody] CreateChallengeCardRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await mediator.Send(
+            new CreateChallengeCardCommand(id, request),
+            cancellationToken);
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpGet("{id:guid}/cards/challenge")]
+    public async Task<ActionResult<List<ChallengeCardResponse>>> GetChallengeCards(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var response = await mediator.Send(
+            new GetChallengeCardsQuery(id),
+            cancellationToken);
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpPut("{id:guid}/cards/challenge/{cardId:guid}")]
+    public async Task<ActionResult<ChallengeCardResponse>> UpdateChallengeCard(
+        [FromRoute] Guid id,
+        [FromRoute] Guid cardId,
+        [FromBody] UpdateChallengeCardRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await mediator.Send(
+            new UpdateChallengeCardCommand(id, cardId, request),
+            cancellationToken);
+
+        return Ok(response);
+    }
+
+    [Authorize]
+    [HttpDelete("{id:guid}/cards/challenge/{cardId:guid}")]
+    public async Task<IActionResult> DeleteChallengeCard(
+        [FromRoute] Guid id,
+        [FromRoute] Guid cardId,
+        CancellationToken cancellationToken)
+    {
+        await mediator.Send(
+            new DeleteChallengeCardCommand(id, cardId),
+            cancellationToken);
+
         return NoContent();
     }
     //endregion

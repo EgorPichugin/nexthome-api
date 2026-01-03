@@ -8,40 +8,40 @@ using NextHome.Core.Interfaces;
 namespace NextHome.Application.Users.Commands;
 
 /// <summary>
-/// Request to update an existing experience card.
+/// Request to update an existing challenge card.
 /// </summary>
 /// <param name="Title">The title of the card to update.</param>
 /// <param name="Description">The description of the card to update.</param>
-public record UpdateExperienceCardRequest(
+public record UpdateChallengeCardRequest(
     string Title,
     string Description
 ) : IUpdateCardRequest;
 
 /// <summary>
-/// Command to update an existing experience card for a user.
+/// Command to update an existing challenge card for a user.
 /// </summary>
 /// <param name="UserId">The identifier of the user who owns the card.</param>
-/// <param name="CardId">The identifier of the experience card to update.</param>
+/// <param name="CardId">The identifier of the challenge card to update.</param>
 /// <param name="Request">The update request containing the details of the card to modify.</param>
-public record UpdateExperienceCardCommand(
+public record UpdateChallengeCardCommand(
     Guid UserId,
     Guid CardId,
-    UpdateExperienceCardRequest Request) : IRequest<ExperienceCardResponse>;
+    UpdateChallengeCardRequest Request) : IRequest<ExperienceCardResponse>;
 
 /// <summary>
-/// Handles the execution of the UpdateExperienceCardCommand, which updates the details of an existing experience card.
+/// Handles the execution of the UpdateChallengeCardCommand, which updates the details of an existing challenge card.
 /// </summary>
-/// <param name="experienceCardRepository">The repository used to access and update experience card entities.</param>
+/// <param name="challengeCardRepository">The repository used to access and update challenge card entities.</param>
 /// <param name="userRepository">The repository used to verify the existence of the user associated with the card.</param>
 /// <param name="cardValidationService">The validation service used to validate the update request.</param>
-public class UpdateExperienceCardCommandHandler(
-    IExperienceCardRepository experienceCardRepository,
+public class UpdateChallengeCardCommandHandler(
+    IChallengeCardRepository challengeCardRepository,
     IUserRepository userRepository,
     ICardValidationService cardValidationService)
-    : IRequestHandler<UpdateExperienceCardCommand, ExperienceCardResponse>
+    : IRequestHandler<UpdateChallengeCardCommand, ExperienceCardResponse>
 {
     /// <inheritdoc/>
-    public async Task<ExperienceCardResponse> Handle(UpdateExperienceCardCommand command,
+    public async Task<ExperienceCardResponse> Handle(UpdateChallengeCardCommand command,
         CancellationToken cancellationToken)
     {
         var user = await userRepository.GetById(command.UserId, cancellationToken);
@@ -50,7 +50,7 @@ public class UpdateExperienceCardCommandHandler(
             throw new ArgumentException("User not found");
         }
 
-        var card = await experienceCardRepository.GetById(command.CardId, cancellationToken);
+        var card = await challengeCardRepository.GetById(command.CardId, cancellationToken);
         if (card is null)
         {
             throw new ArgumentException("Card not found");
@@ -65,9 +65,9 @@ public class UpdateExperienceCardCommandHandler(
         card.Title = command.Request.Title;
         card.Description = command.Request.Description;
 
-        await experienceCardRepository.Update(card, cancellationToken);
+        await challengeCardRepository.Update(card, cancellationToken);
 
-        var response = await experienceCardRepository.GetById(card.Id, cancellationToken);
+        var response = await challengeCardRepository.GetById(card.Id, cancellationToken);
 
         if (response is null)
         {

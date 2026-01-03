@@ -61,4 +61,9 @@ public class UserEntity
     /// Experience cards associated with the user.
     /// </summary>
     public ICollection<ExperienceCardEntity> ExperienceCards { get; init; } = [];
+    
+    /// <summary>
+    /// Challenge cards associated with the user.
+    /// </summary>
+    public ICollection<ChallengeCardEntity> ChallengeCards { get; init; } = [];
 }

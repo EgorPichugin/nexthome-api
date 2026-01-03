@@ -7,16 +7,18 @@ namespace NextHome.Infrastructure.Repositories;
 
 public class ExperienceCardRepository(AppDbContext appDbContext) : IExperienceCardRepository
 {
-    public async Task<ExperienceCardEntity> Add(ExperienceCardEntity experienceCardEntity, CancellationToken cancellationToken = default)
+    public async Task<ExperienceCardEntity> Add(ExperienceCardEntity experienceCardEntity,
+        CancellationToken cancellationToken = default)
     {
         appDbContext.ExperienceCards.Add(experienceCardEntity);
         await appDbContext.SaveChangesAsync(cancellationToken);
         return experienceCardEntity;
     }
 
-    public Task<List<ExperienceCardEntity>> GetExperienceCardsByUserId(Guid userId, CancellationToken cancellationToken = default)
+    public Task<List<ExperienceCardEntity>> GetExperienceCardsByUserId(Guid userId,
+        CancellationToken cancellationToken = default)
     {
-        return appDbContext.ExperienceCards.Where(card => card.User.Id == userId).ToListAsync(cancellationToken); 
+        return appDbContext.ExperienceCards.Where(card => card.User.Id == userId).ToListAsync(cancellationToken);
     }
 
     public Task<ExperienceCardEntity?> GetById(Guid id, CancellationToken cancellationToken = default)
