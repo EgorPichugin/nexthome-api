@@ -14,11 +14,8 @@ public class Program
                          ?? throw new InvalidOperationException("EnvironmentOptions not found");
         
         builder.Services.ConfigureServices(builder.Configuration);
+        builder.Services.ConfigureCors(envOptions);
         
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.ConfigureCors(envOptions);
-        }
         var app = builder.Build();
         app.ConfigureApp(envOptions);
         app.Run();
