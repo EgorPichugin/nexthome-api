@@ -35,27 +35,4 @@ public static class WebApplicationExtension
         
         return app;
     }
-    
-    //TODO: for testing purpose only, delete after
-    public static WebApplication ConfigureApp(this WebApplication app)
-    {
-        if (true)
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint($"/swagger/{SwaggerDocs.ApiVersion}/swagger.json", SwaggerDocs.ApiName);
-            });
-        }
-        
-        app.UseHttpsRedirection();
-        app.UseRouting();
-        app.UseCors("name");
-        app.UseMiddleware<ExceptionMiddleware>();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.MapControllers();
-        
-        return app;
-    }
 }
