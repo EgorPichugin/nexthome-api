@@ -89,8 +89,6 @@ coverage.*
 **/publish/
 **/wwwroot/dist/
 
-**/Migrations/
-
 # =========================
 # Docker override files (often local-only)
 # =========================
