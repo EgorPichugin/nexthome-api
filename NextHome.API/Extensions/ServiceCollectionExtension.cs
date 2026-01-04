@@ -22,7 +22,7 @@ public static class ServiceCollectionExtension
     /// <param name="services">The IServiceCollection to which the CORS configuration will be added.</param>
     /// <param name="configuration">Builder configuration object.</param>
     /// <returns>The IServiceCollection with the CORS configuration applied.</returns>
-    public static IServiceCollection ConfigureServices(this IServiceCollection services, ConfigurationManager configuration)
+    public static IServiceCollection ConfigureServices(this IServiceCollection services, ConfigurationManager configuration, EnvironmentOptions envOptions)
     {
         // Register all classes as scoped
         var currentAssembly = AssemblyReference.CurrentAssembly;
@@ -81,7 +81,7 @@ public static class ServiceCollectionExtension
         });
         
         // Infrastructure services
-        services.AddInfrastructure(configuration);
+        services.AddInfrastructure(configuration, envOptions.DATABASE_URL);
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IExperienceCardRepository, ExperienceCardRepository>();
         services.AddScoped<IChallengeCardRepository, ChallengeCardRepository>();

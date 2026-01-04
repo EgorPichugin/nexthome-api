@@ -16,7 +16,13 @@ public class EnvironmentOptions
     public string CLIENT_URL { get; set; } = default!;
     
     /// <summary>
+    /// Database URL.
+    /// </summary>
+    public string DATABASE_URL { get; set; } = default!;
+    
+    /// <summary>
     /// Defines whether swagger should be enabled or not.
     /// </summary>
     public bool ENABLE_SWAGGER { get; set; }
+
 }

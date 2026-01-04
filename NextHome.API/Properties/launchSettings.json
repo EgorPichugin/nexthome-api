@@ -10,7 +10,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CLIENT_URL": "http://localhost:3000",
         "CORS_POLICY_NAME": "NEXT_HOME_CORS",
-        "ENABLE_SWAGGER": "true"
+        "ENABLE_SWAGGER": "true",
+        "DATABASE_URL" : "postgresql://postgres:postgres@localhost:5432/nexthome"
       }
     },
     "https": {
@@ -22,7 +23,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "CLIENT_URL": "http://localhost:3000",
         "CORS_POLICY_NAME": "NEXT_HOME_CORS",
-        "ENABLE_SWAGGER": "true"
+        "ENABLE_SWAGGER": "true",
+        "DATABASE_URL" : "postgresql://postgres:postgres@localhost:5432/nexthome"
       }
     }
   }
