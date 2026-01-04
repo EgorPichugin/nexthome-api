@@ -25,8 +25,9 @@ public static class WebApplicationExtension
             });
         }
         
-        app.UseCors(envOptions.CORS_POLICY_NAME);
         app.UseHttpsRedirection();
+        app.UseRouting();
+        app.UseCors(envOptions.CORS_POLICY_NAME);
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseAuthentication();
         app.UseAuthorization();
