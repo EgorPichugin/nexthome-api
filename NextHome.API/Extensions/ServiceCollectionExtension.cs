@@ -41,7 +41,7 @@ public static class ServiceCollectionExtension
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(
                 applicationAssembly));
-
+        
         // Swagger
         services.AddSwaggerGen(options =>
         {
@@ -114,15 +114,16 @@ public static class ServiceCollectionExtension
     /// including any headers and methods, and supports credentials.
     /// </summary>
     /// <param name="services">The IServiceCollection to which the CORS configuration will be added.</param>
+    /// <param name="envOptions">Environment options that allow to retrieve set variables.</param>
     /// <returns>The IServiceCollection with the CORS configuration applied.</returns>
-    public static IServiceCollection ConfigureCors(this IServiceCollection services)
+    public static IServiceCollection ConfigureCors(this IServiceCollection services, EnvironmentOptions envOptions)
     {
         services.AddCors(options =>
         {
-            options.AddPolicy(EnvironmentManager.CorsPolicyName, policyBuilder =>
+            options.AddPolicy(envOptions.CORS_POLICY_NAME, policyBuilder =>
             {
                 policyBuilder
-                    .WithOrigins(EnvironmentManager.ClientUrl)
+                    .WithOrigins(envOptions.CLIENT_URL)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

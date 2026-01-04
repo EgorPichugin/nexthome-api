@@ -12,10 +12,11 @@ public static class WebApplicationExtension
     /// Configures the application pipeline for the WebApplication instance.
     /// </summary>
     /// <param name="app">The WebApplication instance to configure.</param>
+    /// <param name="envOptions">Allows to retrieve environment variables.</param>
     /// <returns>The configured WebApplication instance.</returns>
-    public static WebApplication ConfigureApp(this WebApplication app)
+    public static WebApplication ConfigureApp(this WebApplication app, EnvironmentOptions envOptions)
     {
-        if (EnvironmentManager.EnableSwagger)
+        if (envOptions.ENABLE_SWAGGER)
         {
             app.UseSwagger();
             app.UseSwaggerUI(options =>
@@ -24,7 +25,7 @@ public static class WebApplicationExtension
             });
         }
         
-        app.UseCors(EnvironmentManager.CorsPolicyName);
+        app.UseCors(envOptions.CORS_POLICY_NAME);
         app.UseHttpsRedirection();
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseAuthentication();
