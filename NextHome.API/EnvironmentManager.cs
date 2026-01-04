@@ -16,6 +16,11 @@ public static class EnvironmentManager
     public static readonly string ClientUrl;
 
     /// <summary>
+    /// Defines whether swagger enabled or not.
+    /// </summary>
+    public static readonly bool EnableSwagger;
+
+    /// <summary>
     /// Load environment variables from .env file.
     /// </summary>
     static EnvironmentManager()
@@ -24,6 +29,7 @@ public static class EnvironmentManager
 
         CorsPolicyName = GetRequired("CORS_POLICY_NAME");
         ClientUrl = GetRequired("CLIENT_URL");
+        EnableSwagger = bool.Parse(GetRequired("ENABLE_SWAGGER"));
     }
     
     /// <summary>

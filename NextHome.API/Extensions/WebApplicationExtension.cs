@@ -15,17 +15,17 @@ public static class WebApplicationExtension
     /// <returns>The configured WebApplication instance.</returns>
     public static WebApplication ConfigureApp(this WebApplication app)
     {
-        if (app.Environment.IsDevelopment())
+        if (EnvironmentManager.EnableSwagger)
         {
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint($"/swagger/{SwaggerDocs.ApiVersion}/swagger.json", SwaggerDocs.ApiName);
             });
-            app.UseCors(EnvironmentManager.CorsPolicyName);
-            app.UseHttpsRedirection();
         }
         
+        app.UseCors(EnvironmentManager.CorsPolicyName);
+        app.UseHttpsRedirection();
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseAuthentication();
         app.UseAuthorization();
