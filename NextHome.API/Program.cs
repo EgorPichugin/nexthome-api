@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using NextHome.API.Extensions;
+using NextHome.Infrastructure.Persistence;
 
 namespace NextHome.API;
 
@@ -13,6 +15,13 @@ public class Program
         builder.Services.ConfigureCors(envOptions);
         
         var app = builder.Build();
+        using (var scope = app.Services.CreateScope())
+        {
+            var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            appDbContext.Database.Migrate();
+        }
+
+        
         app.ConfigureApp(envOptions);
         app.Run();
     }
