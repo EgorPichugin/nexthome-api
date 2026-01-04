@@ -27,4 +27,11 @@
       <ProjectReference Include="..\NextHome.Infrastructure\NextHome.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Include="Data/**/*.csv">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+
 </Project>
