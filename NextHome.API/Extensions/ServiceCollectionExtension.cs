@@ -34,6 +34,7 @@ public static class ServiceCollectionExtension
             .WithScopedLifetime());
         
         // Add framework services.
+        services.AddRouting();
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         
