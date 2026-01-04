@@ -132,4 +132,21 @@ public static class ServiceCollectionExtension
         });
         return services;
     }
+    
+    //TODO: for testing purpose only, delete after
+    public static IServiceCollection ConfigureCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("name", policyBuilder =>
+            {
+                policyBuilder
+                    .WithOrigins("https://nexthome-client.vercel.app")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+        return services;
+    }
 }
