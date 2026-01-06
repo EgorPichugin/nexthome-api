@@ -8,10 +8,13 @@
       "applicationUrl": "http://localhost:5295",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CLIENT_URL": "http://localhost:3000",
-        "CORS_POLICY_NAME": "NEXT_HOME_CORS",
-        "ENABLE_SWAGGER": "true",
-        "DATABASE_URL" : "postgresql://postgres:postgres@localhost:5432/nexthome"
+        "Environment__ClientUrl": "http://localhost:3000",
+        "Environment__CorsPolicyName": "NEXT_HOME_CORS",
+        "Environment__EnableSwagger": "true",
+        "Environment__DatabaseUrl" : "postgresql://postgres:postgres@localhost:5432/nexthome",
+        "Qdrant__Host": "host",
+        "Qdrant__Port":  "port",
+        "Qdrant__APIKEY": "apiKey"
       }
     },
     "https": {
@@ -20,11 +23,7 @@
       "launchBrowser": false,
       "applicationUrl": "https://localhost:7237;http://localhost:5295",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "CLIENT_URL": "http://localhost:3000",
-        "CORS_POLICY_NAME": "NEXT_HOME_CORS",
-        "ENABLE_SWAGGER": "true",
-        "DATABASE_URL" : "postgresql://postgres:postgres@localhost:5432/nexthome"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }

@@ -2,8 +2,6 @@ using MediatR;
 using NextHome.Application.Auth.Responses;
 using NextHome.Core.Entities;
 using NextHome.Core.Interfaces;
-using NextHome.Infrastructure;
-using System.Net.Mail;
 using NextHome.Application.Common.Validation;
 using NextHome.Application.Common.Exceptions;
 using NextHome.Core.Enumerations;
