@@ -16,6 +16,7 @@
     <ItemGroup>
       <ProjectReference Include="..\NextHome.Core\NextHome.Core.csproj" />
       <ProjectReference Include="..\NextHome.Infrastructure\NextHome.Infrastructure.csproj" />
+      <ProjectReference Include="..\NextHome.QdrantService\NextHome.QdrantService.csproj" />
     </ItemGroup>
 
 </Project>

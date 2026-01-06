@@ -8,6 +8,7 @@ using NextHome.Core.Interfaces;
 using NextHome.Infrastructure;
 using NextHome.Infrastructure.Extensions;
 using NextHome.Infrastructure.Repositories;
+using NextHome.QdrantService.Extensions;
 
 namespace NextHome.API.Extensions;
 
@@ -81,13 +82,16 @@ public static class ServiceCollectionExtension
         });
         
         // Infrastructure services
-        services.AddInfrastructure(configuration, envOptions.DATABASE_URL);
+        services.AddInfrastructure(configuration, envOptions.DatabaseUrl);
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IExperienceCardRepository, ExperienceCardRepository>();
         services.AddScoped<IChallengeCardRepository, ChallengeCardRepository>();
         
         // Application services
         services.AddApplication();
+        
+        // Qdrant
+        services.AddQdrant();
         
         // JWT
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
@@ -121,10 +125,10 @@ public static class ServiceCollectionExtension
     {
         services.AddCors(options =>
         {
-            options.AddPolicy(envOptions.CORS_POLICY_NAME, policyBuilder =>
+            options.AddPolicy(envOptions.CorsPolicyName, policyBuilder =>
             {
                 policyBuilder
-                    .WithOrigins(envOptions.CLIENT_URL)
+                    .WithOrigins(envOptions.ClientUrl)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

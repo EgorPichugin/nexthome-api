@@ -16,7 +16,7 @@ public static class WebApplicationExtension
     /// <returns>The configured WebApplication instance.</returns>
     public static WebApplication ConfigureApp(this WebApplication app, EnvironmentOptions envOptions)
     {
-        if (envOptions.ENABLE_SWAGGER)
+        if (envOptions.EnableSwagger)
         {
             app.UseSwagger();
             app.UseSwaggerUI(options =>
@@ -27,7 +27,7 @@ public static class WebApplicationExtension
         
         app.UseHttpsRedirection();
         app.UseRouting();
-        app.UseCors(envOptions.CORS_POLICY_NAME);
+        app.UseCors(envOptions.CorsPolicyName);
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseAuthentication();
         app.UseAuthorization();

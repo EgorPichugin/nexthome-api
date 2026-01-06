@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace NextHome.API;
 
 /// <summary>
@@ -5,24 +7,31 @@ namespace NextHome.API;
 /// </summary>
 public class EnvironmentOptions
 {
+    public const string Environment = "Environment";
+
     /// <summary>
     /// Cors policy name.
     /// </summary>
-    public string CORS_POLICY_NAME { get; set; } = default!;
-    
+    [Required(ErrorMessage = "Cors policy name is required")]
+    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
+    public string CorsPolicyName { get; set; } = string.Empty;
+
     /// <summary>
     /// Client URL for cors policy.
     /// </summary>
-    public string CLIENT_URL { get; set; } = default!;
-    
+    [Required(ErrorMessage = "Client URL is required")]
+    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
+    public string ClientUrl { get; set; } = string.Empty;
+
     /// <summary>
     /// Database URL.
     /// </summary>
-    public string DATABASE_URL { get; set; } = default!;
-    
+    [Required(ErrorMessage = "Database URL is required")]
+    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
+    public string DatabaseUrl { get; set; } = string.Empty;
+
     /// <summary>
     /// Defines whether swagger should be enabled or not.
     /// </summary>
-    public bool ENABLE_SWAGGER { get; set; }
-
+    public bool EnableSwagger { get; set; }
 }
