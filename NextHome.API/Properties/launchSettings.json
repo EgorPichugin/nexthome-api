@@ -14,7 +14,7 @@
         "Environment__DatabaseUrl" : "postgresql://postgres:postgres@localhost:5432/nexthome",
         "Qdrant__Host": "host",
         "Qdrant__Port":  "port",
-        "Qdrant__APIKEY": "apiKey"
+        "OPENAI_API_KEY": "key"
       }
     },
     "https": {

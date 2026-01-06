@@ -93,3 +93,5 @@ coverage.*
 # Docker override files (often local-only)
 # =========================
 docker-compose.override.yml
+
+**/Properties/launchSettings.json
