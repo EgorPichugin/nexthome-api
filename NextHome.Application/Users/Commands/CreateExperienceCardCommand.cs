@@ -5,6 +5,7 @@ using NextHome.Application.Users.Interfaces;
 using NextHome.Application.Users.Responses;
 using NextHome.Core.Entities;
 using NextHome.Core.Interfaces;
+using NextHome.QdrantService;
 
 namespace NextHome.Application.Users.Commands;
 
@@ -38,10 +39,12 @@ public record CreateExperienceCardCommand(
 /// <param name="experienceCardRepository">The repository responsible for managing experience card entities.</param>
 /// <param name="userRepository">The repository responsible for managing and retrieving user entities.</param>
 /// <param name="cardValidationService">The service that validates experience card information.</param>
+/// <param name="qdrantService">The service that communicate with a qdrant vector database.</param>
 public class CreateExperienceCardHandler(
     IExperienceCardRepository experienceCardRepository,
     IUserRepository userRepository,
-    ICardValidationService cardValidationService) : IRequestHandler<CreateExperienceCardCommand, ExperienceCardResponse>
+    ICardValidationService cardValidationService,
+    IQdrantService qdrantService) : IRequestHandler<CreateExperienceCardCommand, ExperienceCardResponse>
 {
     /// <inheritdoc/>
     public async Task<ExperienceCardResponse> Handle(CreateExperienceCardCommand command,
@@ -69,6 +72,8 @@ public class CreateExperienceCardHandler(
             CreatedAt = DateTime.UtcNow
         };
         var response = await experienceCardRepository.Add(cardEntity, cancellationToken);
+        await qdrantService.StoreExperienceCard(card: cardEntity, country: user.Country,
+            cancellationToken: cancellationToken);
 
         return new ExperienceCardResponse(response.Id, response.Title, response.Description);
     }

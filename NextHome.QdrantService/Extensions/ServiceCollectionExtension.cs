@@ -7,7 +7,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddQdrant(
         this IServiceCollection services)
     {
-        services.AddScoped<IQdrantService, QdrantService>();
+        services.AddSingleton<IQdrantService, QdrantService>();
 
         return services;
     }

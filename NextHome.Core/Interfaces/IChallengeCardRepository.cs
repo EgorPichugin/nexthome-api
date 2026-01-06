@@ -44,4 +44,12 @@ public interface IChallengeCardRepository
     /// <param name="challengeCardEntity">The challenge card entity with updated values.</param>
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     Task Update(ChallengeCardEntity challengeCardEntity, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Returns list of <see cref="ExperienceCardEntity"/> by list of Ids.
+    /// </summary>
+    /// <param name="ids">List of ids which cards should be returned.</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>List of <see cref="ExperienceCardEntity"/>.</returns>
+    Task<List<ExperienceCardEntity>> GetExperienceCardsByIds(List<Guid> ids, CancellationToken cancellationToken = default);
 }

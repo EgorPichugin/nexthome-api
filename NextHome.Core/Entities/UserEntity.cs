@@ -40,7 +40,7 @@ public class UserEntity
     /// <summary>
     /// City of the user.
     /// </summary>
-    public string? City { get; set; }
+    public required string City { get; set; }
     
     /// <summary>
     /// User status in country.

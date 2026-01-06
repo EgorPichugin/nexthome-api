@@ -18,4 +18,10 @@ public class QdrantOptions
     /// </summary>
     [Range(1, 65535, ErrorMessage = "Port must be between 1 and 65535")]
     public int Port { get; set; }
+    
+    /// <summary>
+    /// OpenAi API Key.
+    /// </summary>
+    [Required(ErrorMessage = "ApiKey is required")]
+    public string OpenAiKey { get; set; } = String.Empty;
 }
