@@ -88,7 +88,7 @@ public sealed class QdrantService : IQdrantService
 
     public QdrantService(IOptions<QdrantOptions> options, ILogger<QdrantService> logger)
     {
-        _client = new QdrantClient(options.Value.Host, options.Value.Port, https: options.Value.UseHttps);
+        _client = new QdrantClient(options.Value.Host, options.Value.Port);
         var openAiClient = new OpenAIClient(options.Value.OpenAiKey);
         _embeddingClient = openAiClient.GetEmbeddingClient(Constants.EmbeddingModel);
         _logger = logger;
@@ -180,7 +180,7 @@ public sealed class QdrantService : IQdrantService
         catch (Exception ex)
         {
             _logger.LogError(ex, "🟥 [OPENAI] similar search FAILED");
-            throw;
+            throw;     
         }
     }
 
@@ -190,14 +190,13 @@ public sealed class QdrantService : IQdrantService
         try
         {
             _logger.LogInformation("[QDRANT] get collection list started");
-
+            
             _logger.LogInformation("[QDRANT] get collection list started");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[QDRANT] get collection list FAILED");
         }
-
         var response = await _client.ListCollectionsAsync();
         return response.ToList();
     }
