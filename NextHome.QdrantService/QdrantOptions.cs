@@ -10,7 +10,6 @@ public class QdrantOptions
     /// Qdrant database host.
     /// </summary>
     [Required(ErrorMessage = "Host is required")]
-    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
     public string Host { get; set; } = String.Empty;
 
     /// <summary>
