@@ -88,10 +88,12 @@ public sealed class QdrantService : IQdrantService
 
     public QdrantService(IOptions<QdrantOptions> options, ILogger<QdrantService> logger)
     {
+        _logger = logger;
+        // TODO: delete after testing
+        _logger.LogInformation("QDRANT OPTIONS: {host}, {port}, {key}", options.Value.Host, options.Value.Port, options.Value.OpenAiKey);
         _client = new QdrantClient(options.Value.Host, options.Value.Port);
         var openAiClient = new OpenAIClient(options.Value.OpenAiKey);
         _embeddingClient = openAiClient.GetEmbeddingClient(Constants.EmbeddingModel);
-        _logger = logger;
     }
 
     /// <inheritdoc />
