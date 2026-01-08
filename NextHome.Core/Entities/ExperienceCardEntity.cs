@@ -1,9 +1,13 @@
 namespace NextHome.Core.Entities;
 
+public interface ICardEntity
+{
+    string Description { get; set; }
+}
 /// <summary>
 /// Represents an experience card.
 /// </summary>
-public record ExperienceCardEntity
+public record ExperienceCardEntity : ICardEntity
 {
     /// <summary>
     /// Gets the unique identifier for the experience card.

@@ -19,7 +19,7 @@ public record UserResponse(
     string FirstName,
     string LastName,
     string Country,
-    string? City,
+    string City,
     EStatus? Status,
     DateTime? ImmigrationDate
 );

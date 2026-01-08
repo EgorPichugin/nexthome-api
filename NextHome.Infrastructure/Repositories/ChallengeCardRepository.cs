@@ -46,7 +46,17 @@ public class ChallengeCardRepository(AppDbContext appDbContext)
         appDbContext.ChallengeCards.Update(challengeCardEntity);
         await appDbContext.SaveChangesAsync(cancellationToken);
     }
-    
+
+    /// <inhetitdoc />
+    public async Task<List<ExperienceCardEntity>> GetExperienceCardsByIds(List<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0) return [];
+
+        return await appDbContext.ExperienceCards
+            .Where(card => ids.Contains(card.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     /// <inhetitdoc />
     public async Task Delete(
         Guid id,

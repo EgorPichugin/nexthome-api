@@ -12,18 +12,16 @@ public class QdrantOptions
     [Required(ErrorMessage = "Host is required")]
     [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
     public string Host { get; set; } = String.Empty;
-    
+
     /// <summary>
     /// Qdrant database port.
     /// </summary>
-    [Required(ErrorMessage = "Port is required")]
-    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
-    public string Port { get; set; } = String.Empty;
+    [Range(1, 65535, ErrorMessage = "Port must be between 1 and 65535")]
+    public int Port { get; set; }
     
     /// <summary>
-    /// Qdrant database api key.
+    /// OpenAi API Key.
     /// </summary>
     [Required(ErrorMessage = "ApiKey is required")]
-    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
-    public string ApiKey { get; set; } = String.Empty;
+    public string OpenAiKey { get; set; } = String.Empty;
 }

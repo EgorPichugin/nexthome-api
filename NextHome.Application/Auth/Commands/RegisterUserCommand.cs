@@ -67,7 +67,7 @@ public class RegisterCommandHandler(IUserRepository userRepository, IUserValidat
             FirstName = command.Request.FirstName.Trim(),
             LastName = command.Request.LastName.Trim(),
             Country = command.Request.Country.Trim(),
-            City = command.Request.City?.Trim(),
+            City = command.Request.City.Trim(),
             Status = command.Request.Status,
             ImmigrationDate = command.Request.ImmigrationDate,
             CreatedAt = DateTime.UtcNow

@@ -31,7 +31,7 @@ public record CreateChallengeCardCommand(
     CreateChallengeCardRequest Request) : IRequest<ChallengeCardResponse>;
 
 /// <summary>
-/// Handles the process of creating and saving an challenge card for a given user.
+/// Handles the process of creating and saving a challenge card for a given user.
 /// This includes retrieving the user, validating existence, and persisting the card details
 /// in the repository.
 /// </summary>

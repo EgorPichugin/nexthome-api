@@ -3,7 +3,7 @@ namespace NextHome.Core.Entities;
 /// <summary>
 /// Represents a challenge card.
 /// </summary>
-public class ChallengeCardEntity
+public class ChallengeCardEntity : ICardEntity
 {
     /// <summary>
     /// Gets the unique identifier for the experience card.

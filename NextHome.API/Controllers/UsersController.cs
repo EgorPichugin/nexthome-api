@@ -74,7 +74,7 @@ public class UsersController(IMediator mediator) : ControllerBase
         [FromRoute] Guid cardId,
         CancellationToken cancellationToken)
     {
-        var response = await mediator.Send(new DeleteExperienceCardCommand(id, cardId), cancellationToken);
+        await mediator.Send(new DeleteExperienceCardCommand(id, cardId), cancellationToken);
         return NoContent();
     }
     //endregion
