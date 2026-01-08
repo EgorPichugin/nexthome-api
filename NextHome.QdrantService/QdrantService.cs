@@ -89,7 +89,7 @@ public sealed class QdrantService : IQdrantService
     public QdrantService(IOptions<QdrantOptions> options, ILogger<QdrantService> logger)
     {
         _logger = logger;
-        _client = new QdrantClient(options.Value.Host, options.Value.Port);
+        _client = new QdrantClient(options.Value.Host, options.Value.Port, https: options.Value.UseHttps);
         var openAiClient = new OpenAIClient(options.Value.OpenAiKey);
         _embeddingClient = openAiClient.GetEmbeddingClient(Constants.EmbeddingModel);
     }
