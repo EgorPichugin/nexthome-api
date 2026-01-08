@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NextHome.Core.Entities;
 using Qdrant.Client.Grpc;
 using Qdrant.Client;
@@ -69,22 +70,28 @@ public sealed class QdrantService : IQdrantService
     /// Default collection name for experience cards.
     /// </summary>
     private const string CountryFilter = "country";
-    
+
     /// <summary>
     /// Client to connect to qdrant instance.
     /// </summary>
     private readonly QdrantClient _client;
-    
+
     /// <summary>
     /// Embedding the client that is responsible for embeddings.
     /// </summary>
     private readonly EmbeddingClient _embeddingClient;
-    
-    public QdrantService(IOptions<QdrantOptions> options)
+
+    /// <summary>
+    /// Logger for qdrant service.
+    /// </summary>
+    private readonly ILogger<QdrantService> _logger;
+
+    public QdrantService(IOptions<QdrantOptions> options, ILogger<QdrantService> logger)
     {
         _client = new QdrantClient(options.Value.Host, options.Value.Port);
         var openAiClient = new OpenAIClient(options.Value.OpenAiKey);
         _embeddingClient = openAiClient.GetEmbeddingClient(Constants.EmbeddingModel);
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -123,11 +130,6 @@ public sealed class QdrantService : IQdrantService
     {
         collectionName ??= Constants.DefaultCollectionName;
         var embeddings = await GetEmbeddings(card, cancellationToken);
-        if (embeddings == null)
-        {
-            throw new InvalidOperationException("Embedding generation failed");
-        }
-
         var point = new PointStruct()
         {
             Id = card.Id,
@@ -135,8 +137,23 @@ public sealed class QdrantService : IQdrantService
             Payload = { [CountryFilter] = country }
         };
 
-        return await _client.UpsertAsync(collectionName: collectionName, points: [point], true, null, null,
-            cancellationToken);
+        try
+        {
+            var result = await _client.UpsertAsync(
+                collectionName: collectionName,
+                points: [point],
+                wait: true,
+                cancellationToken: cancellationToken);
+
+            _logger.LogInformation("🟩 [QDRANT] upsert OK card={CardId}", card.Id);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "🟥 [QDRANT] upsert FAILED card={CardId}", card.Id);
+            throw;
+        }
     }
 
     /// <inheritdoc />
@@ -146,27 +163,41 @@ public sealed class QdrantService : IQdrantService
     {
         collectionName ??= Constants.DefaultCollectionName;
         var embeddings = await GetEmbeddings(card, cancellationToken);
-        if (embeddings == null)
+
+        try
         {
-            throw new InvalidOperationException("Embedding generation failed");
+            var searchResult = await _client.QueryAsync(
+                collectionName: collectionName,
+                query: embeddings,
+                limit: limit,
+                filter: MatchKeyword(CountryFilter, country),
+                payloadSelector: true,
+                scoreThreshold: scoreThreshold,
+                cancellationToken: cancellationToken);
+            _logger.LogInformation("🟥 [OPENAI] similar search OK card={CardId}", card.Id);
+            return searchResult.ToList();
         }
-
-        var searchResult = await _client.QueryAsync(
-            collectionName: collectionName,
-            query: embeddings,
-            limit: limit,
-            filter: MatchKeyword(CountryFilter, country),
-            payloadSelector: true,
-            scoreThreshold: scoreThreshold, 
-            cancellationToken: cancellationToken);
-
-        return searchResult.ToList();
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "🟥 [OPENAI] similar search FAILED");
+            throw;     
+        }
     }
 
     /// <inheritdoc />
     public async Task<List<string>> GetCollectionList()
     {
-        var response = await _client.ListCollectionsAsync(); 
+        try
+        {
+            _logger.LogInformation("[QDRANT] get collection list started");
+            
+            _logger.LogInformation("[QDRANT] get collection list started");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[QDRANT] get collection list FAILED");
+        }
+        var response = await _client.ListCollectionsAsync();
         return response.ToList();
     }
 
@@ -176,13 +207,30 @@ public sealed class QdrantService : IQdrantService
     /// <param name="card"><see cref="ICardEntity"/>.</param>
     /// <param name="cancellationToken">Token to cancel the transactions.</param>
     /// <returns>Vectorized form of card description.</returns>
-    private async Task<float[]?> GetEmbeddings(ICardEntity card, CancellationToken cancellationToken)
+    private async Task<float[]> GetEmbeddings(ICardEntity card, CancellationToken cancellationToken)
     {
-        var response = await _embeddingClient.GenerateEmbeddingAsync(
-            card.Description.ToLower(),
-            cancellationToken: cancellationToken
-        );
+        try
+        {
+            _logger.LogInformation("[OPENAI] embeddings start");
 
-        return response.Value.ToFloats().ToArray();
+            var response = await _embeddingClient.GenerateEmbeddingAsync(
+                card.Description.ToLower(), cancellationToken: cancellationToken);
+
+            var vector = response.Value.ToFloats().ToArray();
+
+            if (vector == null || vector.Length == 0)
+            {
+                throw new InvalidOperationException("Embedding vector null or empty.");
+            }
+
+            _logger.LogInformation("[OPENAI] embeddings OK size={Size}", vector.Length);
+
+            return vector;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[OPENAI] embeddings FAILED");
+            throw;
+        }
     }
 }

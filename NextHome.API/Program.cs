@@ -10,7 +10,8 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
         builder.Services.AddOptions<QdrantOptions>()
             .Bind(builder.Configuration.GetSection(QdrantOptions.Qdrant))
             .ValidateDataAnnotations()
