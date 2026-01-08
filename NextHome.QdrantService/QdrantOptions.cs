@@ -23,4 +23,9 @@ public class QdrantOptions
     /// </summary>
     [Required(ErrorMessage = "ApiKey is required")]
     public string OpenAiKey { get; set; } = String.Empty;
+    
+    /// <summary>
+    /// Defines whether qdrant services use https or grpc to connect to a vector database.
+    /// </summary>
+    public bool UseHttps { get; set; }
 }
