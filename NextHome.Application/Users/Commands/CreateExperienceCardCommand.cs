@@ -72,7 +72,7 @@ public class CreateExperienceCardHandler(
             CreatedAt = DateTime.UtcNow
         };
         var response = await experienceCardRepository.Add(cardEntity, cancellationToken);
-        await qdrantService.StoreExperienceCard(card: cardEntity, country: user.Country,
+        await qdrantService.SaveExperienceCard(card: cardEntity, country: user.Country,
             cancellationToken: cancellationToken);
 
         return new ExperienceCardResponse(response.Id, response.Title, response.Description);

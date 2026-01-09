@@ -4,6 +4,7 @@ using NextHome.Application.Common.Validation;
 using NextHome.Application.Users.Interfaces;
 using NextHome.Application.Users.Responses;
 using NextHome.Core.Interfaces;
+using NextHome.QdrantService;
 
 namespace NextHome.Application.Users.Commands;
 
@@ -34,10 +35,12 @@ public record UpdateExperienceCardCommand(
 /// <param name="experienceCardRepository">The repository used to access and update experience card entities.</param>
 /// <param name="userRepository">The repository used to verify the existence of the user associated with the card.</param>
 /// <param name="cardValidationService">The validation service used to validate the update request.</param>
+/// <param name="qdrantService">The service is responsible for communication with Qdrant.</param>
 public class UpdateExperienceCardCommandHandler(
     IExperienceCardRepository experienceCardRepository,
     IUserRepository userRepository,
-    ICardValidationService cardValidationService)
+    ICardValidationService cardValidationService,
+    IQdrantService qdrantService)
     : IRequestHandler<UpdateExperienceCardCommand, ExperienceCardResponse>
 {
     /// <inheritdoc/>
@@ -68,11 +71,12 @@ public class UpdateExperienceCardCommandHandler(
         await experienceCardRepository.Update(card, cancellationToken);
 
         var response = await experienceCardRepository.GetById(card.Id, cancellationToken);
-
         if (response is null)
         {
             throw new InvalidOperationException("Card not found");
         }
+
+        await qdrantService.SaveExperienceCard(response, user.Country,cancellationToken: cancellationToken);
 
         return new ExperienceCardResponse(response.Id, response.Title, response.Description);
     }

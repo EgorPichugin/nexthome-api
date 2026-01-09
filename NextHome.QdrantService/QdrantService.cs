@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using NextHome.Core.Entities;
 using Qdrant.Client.Grpc;
 using Qdrant.Client;
-using OpenAI;
 using OpenAI.Embeddings;
 using static Qdrant.Client.Grpc.Conditions;
 
@@ -37,7 +36,7 @@ public interface IQdrantService
     /// <param name="collectionName">Collection name where to put the card.</param>
     /// <param name="cancellationToken">Token to cancel the transaction.</param>
     /// <returns>Object that contains common information about stored card.</returns>
-    Task<UpdateResult> StoreExperienceCard(ExperienceCardEntity card, string country,
+    Task<UpdateResult> SaveExperienceCard(ExperienceCardEntity card, string country,
         string collectionName = Constants.DefaultCollectionName, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -46,7 +45,7 @@ public interface IQdrantService
     /// <param name="card"><see cref="ChallengeCardEntity"/>.</param>
     /// <param name="country">The country of the user.</param>
     /// <param name="collectionName">Collection name where to search.</param>
-    /// <param name="limit">Limit for nmber of found cards.</param>
+    /// <param name="limit">Limit for number of found cards.</param>
     /// <param name="scoreThreshold">Score threshold to avoid cards skip cards below it.</param>
     /// <param name="cancellationToken">Token to cancel the transactions.</param>
     /// <returns>List of similar found cards.</returns>
@@ -57,14 +56,28 @@ public interface IQdrantService
     /// <summary>
     /// Retrieves all collection names.
     /// </summary>
+    /// <param name="cancellationToken">Token to cancel the transactions.</param>
     /// <returns>List of Qdrant collection names.</returns>
-    Task<List<string>> GetCollectionList();
+    Task<List<string>> GetCollectionList(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Deletes experience card from Qdrant.
+    /// </summary>
+    /// <param name="card"><see cref="ExperienceCardEntity"/> that should be deleted.</param>
+    /// <param name="collectionName">Collection where the card is stored.</param>
+    /// <param name="cancellationToken">Token to cancel the transaction.</param>
+    Task DeleteExperienceCard(ExperienceCardEntity card, string? collectionName,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
 /// Services qdrant requests.
 /// </summary>
-public sealed class QdrantService : IQdrantService
+public sealed class QdrantService(
+    QdrantClient client,
+    EmbeddingClient embeddingClient,
+    ILogger<QdrantService> logger)
+    : IQdrantService
 {
     /// <summary>
     /// Default collection name for experience cards.
@@ -72,64 +85,60 @@ public sealed class QdrantService : IQdrantService
     private const string CountryFilter = "country";
 
     /// <summary>
-    /// Client to connect to qdrant instance.
+    /// Default size of vector for Qdrant.
     /// </summary>
-    private readonly QdrantClient _client;
-
-    /// <summary>
-    /// Embedding the client that is responsible for embeddings.
-    /// </summary>
-    private readonly EmbeddingClient _embeddingClient;
-
-    /// <summary>
-    /// Logger for qdrant service.
-    /// </summary>
-    private readonly ILogger<QdrantService> _logger;
-
-    public QdrantService(IOptions<QdrantOptions> options, ILogger<QdrantService> logger)
-    {
-        _logger = logger;
-        _client = new QdrantClient(options.Value.Host, options.Value.Port, https: options.Value.UseHttps);
-        var openAiClient = new OpenAIClient(options.Value.OpenAiKey);
-        _embeddingClient = openAiClient.GetEmbeddingClient(Constants.EmbeddingModel);
-    }
+    private const int Size = 1536;
 
     /// <inheritdoc />
     public async Task CreateCollection(string? collectionName = Constants.DefaultCollectionName,
         CancellationToken cancellationToken = default)
     {
         collectionName ??= Constants.DefaultCollectionName;
-        var collections = await _client.ListCollectionsAsync(cancellationToken);
+        var collections = await GetCollectionList(cancellationToken);
         if (collections.Contains(collectionName)) return;
 
         var vectorParams = new VectorParams
         {
-            Size = 1536,
+            Size = Size,
             Distance = Distance.Cosine
         };
 
-        await _client.CreateCollectionAsync(
-            collectionName,
-            vectorParams,
-            cancellationToken: cancellationToken
-        );
+        await ExecuteAsync(
+            () => client.CreateCollectionAsync(
+                collectionName, vectorParams, cancellationToken: cancellationToken),
+                    "{Field} Creating collection started",
+            "{Field} Collection with name {collectionName} successfully created",
+            "{Field} Collection name creating failed",
+            ["[QDRANT]:", collectionName]);
     }
 
     /// <inheritdoc />
     public async Task DeleteCollection(string collectionName, CancellationToken cancellationToken = default)
     {
-        await _client.DeleteCollectionAsync(collectionName: collectionName, cancellationToken: cancellationToken);
+        await ExecuteAsync(
+            () => client.DeleteCollectionAsync(collectionName: collectionName, cancellationToken: cancellationToken),
+            "{Field} Deleting collection started",
+            "{Field} Collection with name {collectionName} successfully deleted",
+            "{Field} Deleting collection name failed.",
+            ["[QDRANT]:", collectionName]);
     }
 
     /// <inheritdoc />
-    public async Task<UpdateResult> StoreExperienceCard(
+    public async Task<UpdateResult> SaveExperienceCard(
         ExperienceCardEntity card,
         string country,
         string? collectionName = Constants.DefaultCollectionName,
         CancellationToken cancellationToken = default)
     {
         collectionName ??= Constants.DefaultCollectionName;
-        var embeddings = await GetEmbeddings(card, cancellationToken);
+        
+        var embeddings = await ExecuteAsync(
+            () => GetEmbeddings(card, cancellationToken),
+            "{Field} Embeddings started",
+            "{Field} Embeddings OK size={Size}",
+            "{Field} embeddings failed", 
+            ["[OPENAI]:", Size]);
+
         var point = new PointStruct()
         {
             Id = card.Id,
@@ -137,23 +146,18 @@ public sealed class QdrantService : IQdrantService
             Payload = { [CountryFilter] = country }
         };
 
-        try
-        {
-            var result = await _client.UpsertAsync(
+        var result = await ExecuteAsync(
+            () => client.UpsertAsync(
                 collectionName: collectionName,
                 points: [point],
                 wait: true,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken),
+            "{Field} Upserting experience card started",
+            "{Field} Upsert OK card={CardId}", 
+            "{Field} Upsert FAILED card={CardId}", 
+            ["[QDRANT]:", card.Id]);
 
-            _logger.LogInformation("🟩 [QDRANT] upsert OK card={CardId}", card.Id);
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "🟥 [QDRANT] upsert FAILED card={CardId}", card.Id);
-            throw;
-        }
+        return result;
     }
 
     /// <inheritdoc />
@@ -162,43 +166,57 @@ public sealed class QdrantService : IQdrantService
         CancellationToken cancellationToken = default)
     {
         collectionName ??= Constants.DefaultCollectionName;
-        var embeddings = await GetEmbeddings(card, cancellationToken);
-
-        try
-        {
-            var searchResult = await _client.QueryAsync(
+        var embeddings = await ExecuteAsync(
+            () => GetEmbeddings(card, cancellationToken),
+            "{Field} Embeddings started",
+            "{Field} Embeddings OK size={Size}", 
+            "{Field} Embeddings failed", 
+            ["[OPENAI]:", Size]);
+        
+        var searchResult = await ExecuteAsync(
+            () => client.QueryAsync(
                 collectionName: collectionName,
                 query: embeddings,
                 limit: limit,
                 filter: MatchKeyword(CountryFilter, country),
                 payloadSelector: true,
                 scoreThreshold: scoreThreshold,
-                cancellationToken: cancellationToken);
-            _logger.LogInformation("🟥 [OPENAI] similar search OK card={CardId}", card.Id);
-            return searchResult.ToList();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "🟥 [OPENAI] similar search FAILED");
-            throw;     
-        }
+                cancellationToken: cancellationToken),
+            "{Field} Search of similar cards started",
+            "{Field} Similar search OK card={CardId}", 
+            "{Field} Similar search failed",
+            ["[QDRANT]:", card.Id]);
+
+        return searchResult.ToList();
     }
 
     /// <inheritdoc />
-    public async Task<List<string>> GetCollectionList()
+    public async Task<List<string>> GetCollectionList(CancellationToken cancellationToken)
     {
-        try
-        {
-            _logger.LogInformation("[QDRANT] get collection list started");
-            
-            _logger.LogInformation("[QDRANT] get collection list started");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[QDRANT] get collection list FAILED");
-        }
-        var response = await _client.ListCollectionsAsync();
-        return response.ToList();
+        var collections = await ExecuteAsync(
+            () => client.ListCollectionsAsync(cancellationToken),
+            "{Field} Retrieving collection names started",
+            "{Field} Collection names retrieved from Qdrant",
+            "{Field} Retrieving collection names failed",
+            "[QDRANT]:");
+
+        return collections.ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteExperienceCard(ExperienceCardEntity card, string? collectionName,
+        CancellationToken cancellationToken = default)
+    {
+        collectionName ??= Constants.DefaultCollectionName;
+        await ExecuteAsync(
+            () => client.DeleteAsync(
+                collectionName: collectionName,
+                id: card.Id,
+                cancellationToken: cancellationToken),
+            "{Field} Deleting experience card started",
+            "{Field} Experience card {CardId} successfully deleted",
+            "{Field} Deleting experience card failed",
+            ["[QDRANT]:", card.Id]);
     }
 
     /// <summary>
@@ -209,27 +227,52 @@ public sealed class QdrantService : IQdrantService
     /// <returns>Vectorized form of card description.</returns>
     private async Task<float[]> GetEmbeddings(ICardEntity card, CancellationToken cancellationToken)
     {
+        var response = await embeddingClient.GenerateEmbeddingAsync(
+            card.Description.ToLower(), cancellationToken: cancellationToken);
+
+        var vector = response.Value.ToFloats().ToArray() ??
+                     throw new InvalidOperationException("Embedding vector null or empty.");
+
+        return vector;
+    }
+
+    private async Task<T> ExecuteAsync<T>(
+        Func<Task<T>> action,
+        string startingLog,
+        string successLog,
+        string errorLog,
+        params object[] logArgs)
+    {
         try
         {
-            _logger.LogInformation("[OPENAI] embeddings start");
-
-            var response = await _embeddingClient.GenerateEmbeddingAsync(
-                card.Description.ToLower(), cancellationToken: cancellationToken);
-
-            var vector = response.Value.ToFloats().ToArray();
-
-            if (vector == null || vector.Length == 0)
-            {
-                throw new InvalidOperationException("Embedding vector null or empty.");
-            }
-
-            _logger.LogInformation("[OPENAI] embeddings OK size={Size}", vector.Length);
-
-            return vector;
+            logger.LogInformation(startingLog, logArgs);
+            var result = await action();
+            logger.LogInformation(successLog, logArgs);
+            return result;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[OPENAI] embeddings FAILED");
+            logger.LogError(ex, errorLog, logArgs);
+            throw;
+        }
+    }
+
+    private async Task ExecuteAsync(
+        Func<Task> action,
+        string startingLog,
+        string successLog,
+        string errorLog,
+        params object[] logArgs)
+    {
+        try
+        {
+            logger.LogInformation(startingLog, logArgs);
+            await action();
+            logger.LogInformation(successLog, logArgs);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, errorLog, logArgs);
             throw;
         }
     }
