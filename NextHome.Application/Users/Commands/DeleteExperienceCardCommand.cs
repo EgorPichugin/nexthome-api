@@ -1,5 +1,6 @@
 using MediatR;
 using NextHome.Core.Interfaces;
+using NextHome.QdrantService;
 
 namespace NextHome.Application.Users.Commands;
 
@@ -18,9 +19,11 @@ public record DeleteExperienceCardCommand(
 /// </summary>
 /// <param name="experienceCardRepository">The repository used to access and delete experience card entities.</param>
 /// <param name="userRepository">The repository used to verify the existence of the user associated with the card.</param>
+/// <param name="qdrantService">The service is responsible for communication with Qdrant.</param>
 public class DeleteExperienceCardCommandHandler(
     IExperienceCardRepository experienceCardRepository,
-    IUserRepository userRepository)
+    IUserRepository userRepository,
+    IQdrantService qdrantService)
     : IRequestHandler<DeleteExperienceCardCommand, Unit>
 {
     /// <inheritdoc/>
@@ -39,6 +42,7 @@ public class DeleteExperienceCardCommandHandler(
         }
 
         await experienceCardRepository.Delete(command.CardId, cancellationToken);
+        await qdrantService.DeleteExperienceCard(card: card, null, cancellationToken:  cancellationToken);
 
         return Unit.Value;
     }
