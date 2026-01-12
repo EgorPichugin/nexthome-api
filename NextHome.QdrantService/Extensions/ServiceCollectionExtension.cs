@@ -13,18 +13,14 @@ public static class ServiceCollectionExtension
     {
         services.AddSingleton<IQdrantService, QdrantService>();
 
+        // Register QdrantClient
         services.AddSingleton<QdrantClient>(serviceProvider =>
         {
             var qdrantOptions = serviceProvider.GetRequiredService<IOptions<QdrantOptions>>().Value;
             return new QdrantClient(qdrantOptions.Host, qdrantOptions.Port);
         });
 
-        services.AddSingleton<OpenAIClient>(serviceProvider =>
-        {
-            var openAiOptions = serviceProvider.GetRequiredService<IOptions<OpenAiOptions>>().Value;
-            return new OpenAIClient(openAiOptions.Key);
-        });
-
+        // Regiter OpenAi EmbeddingClient
         services.AddSingleton<EmbeddingClient>(serviceProvider =>
         {
             var openAiClient = serviceProvider.GetRequiredService<OpenAIClient>();

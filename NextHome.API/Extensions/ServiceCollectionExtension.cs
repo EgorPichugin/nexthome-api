@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NextHome.API.Constants;
@@ -10,6 +11,7 @@ using NextHome.Infrastructure.Extensions;
 using NextHome.Infrastructure.Repositories;
 using NextHome.QdrantService;
 using NextHome.QdrantService.Extensions;
+using OpenAI;
 
 namespace NextHome.API.Extensions;
 
@@ -38,11 +40,13 @@ public static class ServiceCollectionExtension
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddOptions<OpenAiOptions>()
-            .Bind(configuration.GetSection(OpenAiOptions.OpenAi))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
+        // Register OpenAI Client
+        services.AddSingleton<OpenAIClient>(serviceProvider =>
+        {
+            var environmentOptions = serviceProvider.GetRequiredService<IOptions<EnvironmentOptions>>().Value;
+            return new OpenAIClient(environmentOptions.OpenAiKey);
+        });
+        
         // Register all classes as scoped
         var currentAssembly = AssemblyReference.CurrentAssembly;
         var applicationAssembly = Application.AssemblyReference.CurrentAssembly;

@@ -27,7 +27,7 @@ public class CardValidationService : ICardValidationService
         var errors = new List<string>();
         
         if (!IsValidTitle(request.Title)) errors.Add("Title is required.");
-        if (!IsValidDescription(request.Description, 20)) errors.Add("Description is empty or too short. It should be 100 symbols at least.");
+        if (!IsValidDescription(request.Description, 50)) errors.Add("Description is empty or too short. It should be 50 symbols at least.");
         
         return errors;
     }

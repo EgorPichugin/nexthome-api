@@ -35,11 +35,13 @@ public record UpdateExperienceCardCommand(
 /// <param name="experienceCardRepository">The repository used to access and update experience card entities.</param>
 /// <param name="userRepository">The repository used to verify the existence of the user associated with the card.</param>
 /// <param name="cardValidationService">The validation service used to validate the update request.</param>
+/// <param name="moderationService">The service responsible for moderating content for compliance.</param>
 /// <param name="qdrantService">The service is responsible for communication with Qdrant.</param>
 public class UpdateExperienceCardCommandHandler(
     IExperienceCardRepository experienceCardRepository,
     IUserRepository userRepository,
     ICardValidationService cardValidationService,
+    IModerationService moderationService,
     IQdrantService qdrantService)
     : IRequestHandler<UpdateExperienceCardCommand, ExperienceCardResponse>
 {
@@ -47,23 +49,22 @@ public class UpdateExperienceCardCommandHandler(
     public async Task<ExperienceCardResponse> Handle(UpdateExperienceCardCommand command,
         CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetById(command.UserId, cancellationToken);
-        if (user is null)
-        {
-            throw new ArgumentException("User not found");
-        }
+        var user = await userRepository.GetById(command.UserId, cancellationToken) 
+            ?? throw new ArgumentException("User not found");
 
-        var card = await experienceCardRepository.GetById(command.CardId, cancellationToken);
-        if (card is null)
-        {
-            throw new ArgumentException("Card not found");
-        }
+        var card = await experienceCardRepository.GetById(command.CardId, cancellationToken) 
+            ?? throw new ArgumentException("Card not found");
 
         var errors = cardValidationService.Validate(command.Request);
         if (errors.Any())
         {
             throw new ValidationException(errors);
         }
+
+        await moderationService.Moderate(
+            [command.Request.Title, command.Request.Description], 
+            cancellationToken
+        );
 
         card.Title = command.Request.Title;
         card.Description = command.Request.Description;

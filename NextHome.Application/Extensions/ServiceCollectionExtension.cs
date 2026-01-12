@@ -1,11 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using NextHome.Application.Common.Validation;
 using NextHome.Application.Countries.Services;
-using NextHome.QdrantService;
 using OpenAI;
-using OpenAI.Embeddings;
-using Qdrant.Client;
+using OpenAI.Moderations;
 
 namespace NextHome.Application.Extensions;
 
@@ -17,6 +14,14 @@ public static class ServiceCollectionExtension
         services.AddScoped<ICsvReaderService, CsvReaderService>();
         services.AddScoped<IUserValidationService, UserValidationService>();
         services.AddScoped<ICardValidationService, CardValidationService>();
+        services.AddScoped<IModerationService, ModerationService>();
+
+        // Register OpenAI ModerationClient
+        services.AddSingleton<ModerationClient>(serviceProvider =>
+        {
+            var openAiClient = serviceProvider.GetRequiredService<OpenAIClient>();
+            return openAiClient.GetModerationClient(Constants.ChatModel);
+        });
 
         return services;
     }

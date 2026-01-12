@@ -1,4 +1,5 @@
 using FluentValidation;
+using NextHome.Application.Common.Exceptions;
 using ValidationException = NextHome.Application.Common.Exceptions.ValidationException;
 
 namespace NextHome.API.Middleware;
@@ -54,6 +55,16 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
             await context.Response.WriteAsJsonAsync(new {
                 message = "Validation failed",
                 errors = exception.Errors
+            });
+        }
+        catch (ModerationException exception)
+        {
+            logger.LogError(exception, "Moderation error");
+            context.Response.StatusCode = 400;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new {
+                message = "Content rejected by moderation",
+                errors = exception.Message
             });
         }
         catch (Exception ex)

@@ -33,4 +33,11 @@ public class EnvironmentOptions
     /// Defines whether swagger should be enabled or not.
     /// </summary>
     public bool EnableSwagger { get; set; }
+
+    /// <summary>
+    /// OpenAI Key.
+    /// </summary>
+    [Required(ErrorMessage = "OpenAI key is required")]
+    [Key]
+    public string OpenAiKey { get; set; } = string.Empty;
 }
