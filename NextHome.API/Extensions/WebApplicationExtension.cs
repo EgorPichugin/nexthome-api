@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using NextHome.API.Constants;
 using NextHome.API.Middleware;
 
@@ -12,10 +13,12 @@ public static class WebApplicationExtension
     /// Configures the application pipeline for the WebApplication instance.
     /// </summary>
     /// <param name="app">The WebApplication instance to configure.</param>
-    /// <param name="envOptions">Allows to retrieve environment variables.</param>
     /// <returns>The configured WebApplication instance.</returns>
-    public static WebApplication ConfigureApp(this WebApplication app, EnvironmentOptions envOptions)
+    public static WebApplication ConfigureApp(this WebApplication app)
     {
+        var envOptions = app.Services
+            .GetRequiredService<IOptions<EnvironmentOptions>>()
+            .Value;
         if (envOptions.EnableSwagger)
         {
             app.UseSwagger();
@@ -24,7 +27,7 @@ public static class WebApplicationExtension
                 options.SwaggerEndpoint($"/swagger/{SwaggerDocs.ApiVersion}/swagger.json", SwaggerDocs.ApiName);
             });
         }
-        
+
         app.UseHttpsRedirection();
         app.UseRouting();
         app.UseCors(envOptions.CorsPolicyName);
@@ -32,7 +35,7 @@ public static class WebApplicationExtension
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
-        
+
         return app;
     }
 }

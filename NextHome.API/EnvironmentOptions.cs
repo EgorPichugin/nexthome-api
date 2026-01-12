@@ -20,14 +20,13 @@ public class EnvironmentOptions
     /// Client URL for cors policy.
     /// </summary>
     [Required(ErrorMessage = "Client URL is required")]
-    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
+    [Url]
     public string ClientUrl { get; set; } = string.Empty;
 
     /// <summary>
     /// Database URL.
     /// </summary>
     [Required(ErrorMessage = "Database URL is required")]
-    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
     public string DatabaseUrl { get; set; } = string.Empty;
 
     /// <summary>

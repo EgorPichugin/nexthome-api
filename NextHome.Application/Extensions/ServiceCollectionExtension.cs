@@ -18,22 +18,6 @@ public static class ServiceCollectionExtension
         services.AddScoped<IUserValidationService, UserValidationService>();
         services.AddScoped<ICardValidationService, CardValidationService>();
 
-        var qdrantOptions = services.BuildServiceProvider().GetService<IOptions<QdrantOptions>>();
-        if (qdrantOptions == null)
-        {
-            throw new InvalidOperationException("Qdrant options not set.");
-        }
-
-        services.AddSingleton<QdrantClient>(_ =>
-            new QdrantClient(qdrantOptions.Value.Host, qdrantOptions.Value.Port));
-        services.AddSingleton<OpenAIClient>(_ => new OpenAIClient(qdrantOptions.Value.OpenAiKey));
-
-        services.AddSingleton<EmbeddingClient>(serviceProvider =>
-        {
-            var openAi = serviceProvider.GetRequiredService<OpenAIClient>();
-            return openAi.GetEmbeddingClient(Constants.EmbeddingModel);
-        });
-
         return services;
     }
 }
