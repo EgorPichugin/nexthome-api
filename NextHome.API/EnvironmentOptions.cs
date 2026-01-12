@@ -20,18 +20,24 @@ public class EnvironmentOptions
     /// Client URL for cors policy.
     /// </summary>
     [Required(ErrorMessage = "Client URL is required")]
-    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
+    [Url]
     public string ClientUrl { get; set; } = string.Empty;
 
     /// <summary>
     /// Database URL.
     /// </summary>
     [Required(ErrorMessage = "Database URL is required")]
-    [RegularExpression(@"^[a-zA-Z''-'\s]{1,40}$")]
     public string DatabaseUrl { get; set; } = string.Empty;
 
     /// <summary>
     /// Defines whether swagger should be enabled or not.
     /// </summary>
     public bool EnableSwagger { get; set; }
+
+    /// <summary>
+    /// OpenAI Key.
+    /// </summary>
+    [Required(ErrorMessage = "OpenAI key is required")]
+    [Key]
+    public string OpenAiKey { get; set; } = string.Empty;
 }

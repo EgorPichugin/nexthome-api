@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NextHome.API.Constants;
@@ -8,7 +9,9 @@ using NextHome.Core.Interfaces;
 using NextHome.Infrastructure;
 using NextHome.Infrastructure.Extensions;
 using NextHome.Infrastructure.Repositories;
+using NextHome.QdrantService;
 using NextHome.QdrantService.Extensions;
+using OpenAI;
 
 namespace NextHome.API.Extensions;
 
@@ -23,8 +26,27 @@ public static class ServiceCollectionExtension
     /// <param name="services">The IServiceCollection to which the CORS configuration will be added.</param>
     /// <param name="configuration">Builder configuration object.</param>
     /// <returns>The IServiceCollection with the CORS configuration applied.</returns>
-    public static IServiceCollection ConfigureServices(this IServiceCollection services, ConfigurationManager configuration, EnvironmentOptions envOptions)
+    public static IServiceCollection ConfigureServices(this IServiceCollection services,
+        ConfigurationManager configuration)
     {
+        // Add options
+        services.AddOptions<QdrantOptions>()
+            .Bind(configuration.GetSection(QdrantOptions.Qdrant))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<EnvironmentOptions>()
+            .Bind(configuration.GetSection(EnvironmentOptions.Environment))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Register OpenAI Client
+        services.AddSingleton<OpenAIClient>(serviceProvider =>
+        {
+            var environmentOptions = serviceProvider.GetRequiredService<IOptions<EnvironmentOptions>>().Value;
+            return new OpenAIClient(environmentOptions.OpenAiKey);
+        });
+        
         // Register all classes as scoped
         var currentAssembly = AssemblyReference.CurrentAssembly;
         var applicationAssembly = Application.AssemblyReference.CurrentAssembly;
@@ -33,17 +55,17 @@ public static class ServiceCollectionExtension
             .AddClasses()
             .AsImplementedInterfaces()
             .WithScopedLifetime());
-        
+
         // Add framework services.
         services.AddRouting();
         services.AddControllers();
         services.AddEndpointsApiExplorer();
-        
+
         // MediatR
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(
                 applicationAssembly));
-        
+
         // Swagger
         services.AddSwaggerGen(options =>
         {
@@ -52,9 +74,9 @@ public static class ServiceCollectionExtension
                 Title = SwaggerDocs.ApiName,
                 Version = SwaggerDocs.ApiVersion
             });
-            
+
             options.CustomSchemaIds(description => description.FullName);
-            
+
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
@@ -80,19 +102,20 @@ public static class ServiceCollectionExtension
                 }
             });
         });
-        
+
         // Infrastructure services
+        var envOptions = GetEnvironmentOptions(configuration);
         services.AddInfrastructure(configuration, envOptions.DatabaseUrl);
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IExperienceCardRepository, ExperienceCardRepository>();
         services.AddScoped<IChallengeCardRepository, ChallengeCardRepository>();
-        
+
         // Application services
         services.AddApplication();
-        
+
         // Qdrant
         services.AddQdrant();
-        
+
         // JWT
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services
@@ -119,10 +142,12 @@ public static class ServiceCollectionExtension
     /// including any headers and methods, and supports credentials.
     /// </summary>
     /// <param name="services">The IServiceCollection to which the CORS configuration will be added.</param>
-    /// <param name="envOptions">Environment options that allow to retrieve set variables.</param>
+    /// <param name="configurationManager">Builder configuration object.</param>
     /// <returns>The IServiceCollection with the CORS configuration applied.</returns>
-    public static IServiceCollection ConfigureCors(this IServiceCollection services, EnvironmentOptions envOptions)
+    public static IServiceCollection ConfigureCors(this IServiceCollection services,
+        ConfigurationManager configurationManager)
     {
+        var envOptions = GetEnvironmentOptions(configurationManager);
         services.AddCors(options =>
         {
             options.AddPolicy(envOptions.CorsPolicyName, policyBuilder =>
@@ -135,5 +160,16 @@ public static class ServiceCollectionExtension
             });
         });
         return services;
+    }
+
+    /// <summary>
+    /// Retrieves values for environment options.
+    /// </summary>
+    /// <param name="configurationManager">Build configuration object.</param>
+    /// <returns>The <see cref="EnvironmentOptions"/> instance.</returns>
+    private static EnvironmentOptions GetEnvironmentOptions(ConfigurationManager configurationManager)
+    {
+        return configurationManager.GetSection(EnvironmentOptions.Environment).Get<EnvironmentOptions>() ??
+                         throw new InvalidOperationException("Environment options not set.");
     }
 }

@@ -39,11 +39,13 @@ public record CreateExperienceCardCommand(
 /// <param name="experienceCardRepository">The repository responsible for managing experience card entities.</param>
 /// <param name="userRepository">The repository responsible for managing and retrieving user entities.</param>
 /// <param name="cardValidationService">The service that validates experience card information.</param>
+/// <param name="moderationService">The service that moderates content for compliance.</param>
 /// <param name="qdrantService">The service that communicate with a qdrant vector database.</param>
 public class CreateExperienceCardHandler(
     IExperienceCardRepository experienceCardRepository,
     IUserRepository userRepository,
     ICardValidationService cardValidationService,
+    IModerationService moderationService,
     IQdrantService qdrantService) : IRequestHandler<CreateExperienceCardCommand, ExperienceCardResponse>
 {
     /// <inheritdoc/>
@@ -61,6 +63,11 @@ public class CreateExperienceCardHandler(
         {
             throw new ValidationException(errors);
         }
+
+        await moderationService.Moderate(
+            [command.Request.Title, command.Request.Description], 
+            cancellationToken
+        );
 
         var cardEntity = new ExperienceCardEntity
         {

@@ -37,26 +37,30 @@ public record CreateChallengeCardCommand(
 /// </summary>
 /// <param name="challengeCardRepository">The repository responsible for managing challenge card entities.</param>
 /// <param name="userRepository">The repository responsible for managing and retrieving user entities.</param>
+/// <param name="moderationService">The service responsible for moderating content for compliance.</param>
 /// <param name="cardValidationService">The service that validates card information.</param>
 public class CreateChallengeCardHandler(
     IChallengeCardRepository challengeCardRepository,
     IUserRepository userRepository,
+    IModerationService moderationService,
     ICardValidationService cardValidationService) : IRequestHandler<CreateChallengeCardCommand, ChallengeCardResponse>
 {
     /// <inheritdoc/>
     public async Task<ChallengeCardResponse> Handle(CreateChallengeCardCommand command, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetById(command.UserId, cancellationToken);
-        if (user is null)
-        {
-            throw new ArgumentException("User not found");
-        }
+        var user = await userRepository.GetById(command.UserId, cancellationToken) 
+            ?? throw new ArgumentException("User not found");
         
         var errors = cardValidationService.Validate(command.Request);
         if (errors.Any())
         {
             throw new ValidationException(errors);
         }
+
+        await moderationService.Moderate(
+            [command.Request.Title, command.Request.Description], 
+            cancellationToken
+        );
         
         var cardEntity = new ChallengeCardEntity()
         {

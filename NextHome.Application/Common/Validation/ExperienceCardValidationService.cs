@@ -27,7 +27,7 @@ public class CardValidationService : ICardValidationService
         var errors = new List<string>();
         
         if (!IsValidTitle(request.Title)) errors.Add("Title is required.");
-        if (!IsValidDescription(request.Description)) errors.Add("Description is required.");
+        if (!IsValidDescription(request.Description, 50)) errors.Add("Description is empty or too short. It should be 50 symbols at least.");
         
         return errors;
     }
@@ -46,9 +46,10 @@ public class CardValidationService : ICardValidationService
     /// Validates the description field to ensure it is not null, empty, or whitespace.
     /// </summary>
     /// <param name="description">The description to validate.</param>
+    /// <param name="length">The minimum length for a description of the experience.</param>
     /// <returns>A boolean value indicating whether the description is valid.</returns>
-    private static bool IsValidDescription(string description)
+    private static bool IsValidDescription(string description, int length)
     {
-        return !string.IsNullOrWhiteSpace(description);
+        return !string.IsNullOrWhiteSpace(description) &&  description.Length > length;
     }
 }

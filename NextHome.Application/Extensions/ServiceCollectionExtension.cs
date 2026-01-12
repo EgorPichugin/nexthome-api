@@ -1,11 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using NextHome.Application.Common.Validation;
 using NextHome.Application.Countries.Services;
-using NextHome.QdrantService;
 using OpenAI;
-using OpenAI.Embeddings;
-using Qdrant.Client;
+using OpenAI.Moderations;
 
 namespace NextHome.Application.Extensions;
 
@@ -17,21 +14,13 @@ public static class ServiceCollectionExtension
         services.AddScoped<ICsvReaderService, CsvReaderService>();
         services.AddScoped<IUserValidationService, UserValidationService>();
         services.AddScoped<ICardValidationService, CardValidationService>();
+        services.AddScoped<IModerationService, ModerationService>();
 
-        var qdrantOptions = services.BuildServiceProvider().GetService<IOptions<QdrantOptions>>();
-        if (qdrantOptions == null)
+        // Register OpenAI ModerationClient
+        services.AddSingleton<ModerationClient>(serviceProvider =>
         {
-            throw new InvalidOperationException("Qdrant options not set.");
-        }
-
-        services.AddSingleton<QdrantClient>(_ =>
-            new QdrantClient(qdrantOptions.Value.Host, qdrantOptions.Value.Port));
-        services.AddSingleton<OpenAIClient>(_ => new OpenAIClient(qdrantOptions.Value.OpenAiKey));
-
-        services.AddSingleton<EmbeddingClient>(serviceProvider =>
-        {
-            var openAi = serviceProvider.GetRequiredService<OpenAIClient>();
-            return openAi.GetEmbeddingClient(Constants.EmbeddingModel);
+            var openAiClient = serviceProvider.GetRequiredService<OpenAIClient>();
+            return openAiClient.GetModerationClient(Constants.ChatModel);
         });
 
         return services;

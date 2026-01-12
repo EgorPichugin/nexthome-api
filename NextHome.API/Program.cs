@@ -12,17 +12,9 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
-        builder.Services.AddOptions<QdrantOptions>()
-            .Bind(builder.Configuration.GetSection(QdrantOptions.Qdrant))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
 
-        var envOptions = builder.Configuration.GetSection(EnvironmentOptions.Environment)
-                             .Get<EnvironmentOptions>()
-                         ?? throw new InvalidOperationException("Environment options not set.");
-
-        builder.Services.ConfigureServices(builder.Configuration, envOptions);
-        builder.Services.ConfigureCors(envOptions);
+        builder.Services.ConfigureServices(builder.Configuration);
+        builder.Services.ConfigureCors(builder.Configuration);
 
         var app = builder.Build();
         using (var scope = app.Services.CreateScope())
@@ -31,7 +23,7 @@ public class Program
             appDbContext.Database.Migrate();
         }
 
-        app.ConfigureApp(envOptions);
+        app.ConfigureApp();
         app.Run();
     }
 }

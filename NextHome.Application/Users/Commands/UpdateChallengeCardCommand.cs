@@ -33,10 +33,12 @@ public record UpdateChallengeCardCommand(
 /// </summary>
 /// <param name="challengeCardRepository">The repository used to access and update challenge card entities.</param>
 /// <param name="userRepository">The repository used to verify the existence of the user associated with the card.</param>
+/// <param name="moderationService">The service responsible for moderating content for compliance.</param>
 /// <param name="cardValidationService">The validation service used to validate the update request.</param>
 public class UpdateChallengeCardCommandHandler(
     IChallengeCardRepository challengeCardRepository,
     IUserRepository userRepository,
+    IModerationService moderationService,
     ICardValidationService cardValidationService)
     : IRequestHandler<UpdateChallengeCardCommand, ExperienceCardResponse>
 {
@@ -61,6 +63,11 @@ public class UpdateChallengeCardCommandHandler(
         {
             throw new ValidationException(errors);
         }
+
+        await moderationService.Moderate(
+            [command.Request.Title, command.Request.Description], 
+            cancellationToken
+        );
 
         card.Title = command.Request.Title;
         card.Description = command.Request.Description;

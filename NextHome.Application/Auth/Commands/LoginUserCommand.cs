@@ -14,7 +14,7 @@ public class LoginCommandHandler(IUserRepository userRepository, IJwtTokenGenera
 {
     public async Task<LoginUserResponse> Handle(LoginUserCommand userCommand, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetByEmail(userCommand.UserRequest.Email, cancellationToken) ??
+        var user = await userRepository.GetByEmail(userCommand.UserRequest.Email.ToLower(), cancellationToken) ??
                    throw new ArgumentException("Invalid email or password.");
 
         if (!BCrypt.Net.BCrypt.Verify(userCommand.UserRequest.Password, user.PasswordHash))
