@@ -62,7 +62,7 @@ public class RegisterCommandHandler(IUserRepository userRepository, IUserValidat
         var user = new UserEntity
         {
             Id = Guid.NewGuid(),
-            Email = command.Request.Email.Trim(),
+            Email = command.Request.Email.Trim().ToLower(),
             PasswordHash = passwordHash,
             FirstName = command.Request.FirstName.Trim(),
             LastName = command.Request.LastName.Trim(),
