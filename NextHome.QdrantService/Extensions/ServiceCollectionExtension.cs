@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using NextHome.Core.Interfaces;
+using NextHome.QdrantService.Options;
 using OpenAI;
 using OpenAI.Embeddings;
 using Qdrant.Client;
@@ -12,7 +14,7 @@ public static class ServiceCollectionExtension
         this IServiceCollection services)
     {
         services.AddSingleton<IQdrantService, QdrantService>();
-
+        
         // Register QdrantClient
         services.AddSingleton<QdrantClient>(serviceProvider =>
         {
@@ -20,7 +22,7 @@ public static class ServiceCollectionExtension
             return new QdrantClient(qdrantOptions.Host, qdrantOptions.Port);
         });
 
-        // Regiter OpenAi EmbeddingClient
+        // Register OpenAi EmbeddingClient
         services.AddSingleton<EmbeddingClient>(serviceProvider =>
         {
             var openAiClient = serviceProvider.GetRequiredService<OpenAIClient>();

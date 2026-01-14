@@ -87,6 +87,7 @@ namespace NextHome.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("City")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Country")
@@ -100,12 +101,21 @@ namespace NextHome.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("EmailConfirmationToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("EmailConfirmationTokenExpiry")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("ImmigrationDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsEmailConfirmed")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
                         .IsRequired()

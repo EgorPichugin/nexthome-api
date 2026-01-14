@@ -5,6 +5,8 @@ using NextHome.Application.Users.Interfaces;
 using NextHome.Application.Users.Responses;
 using NextHome.Core.Entities;
 using NextHome.Core.Interfaces;
+using NextHome.Core.Interfaces.Repositories;
+using NextHome.Core.Interfaces.Services;
 using NextHome.QdrantService;
 
 namespace NextHome.Application.Users.Commands;

@@ -31,6 +31,35 @@ public class UsersController(IMediator mediator) : ControllerBase
         var response = await mediator.Send(new UpdateUserCommand(id, request), cancellationToken);
         return Ok(response);
     }
+
+    //TODO: make it available only for admin
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(
+        [FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        await mediator.Send(new DeleteUserCommand(id),  cancellationToken);
+        return NoContent();
+    }
+    
+    //TODO: make it available only for admin
+    [HttpDelete("by-email")]
+    public async Task<IActionResult> DeleteByEmail(
+        [FromQuery] string email,
+        CancellationToken cancellationToken)
+    {
+        await mediator.Send(new DeleteUserByEmailCommand(email), cancellationToken);
+        return NoContent();
+    }
+
+
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(
+        [FromQuery] string token,
+        CancellationToken cancellationToken)
+    {
+        await mediator.Send(new ConfirmEmailCommand(token), cancellationToken);
+        return Ok();
+    }
     //endregion
     
     //region Experience cards

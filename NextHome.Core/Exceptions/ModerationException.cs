@@ -1,7 +1,7 @@
-namespace NextHome.Application.Common.Exceptions;
+namespace NextHome.Core.Exceptions;
 
 /// <summary>
-/// Represents an exception thrown when content is rejected by moderation.
+/// Represents an exception thrown when moderation rejects content.
 /// </summary>
 public sealed class ModerationException : Exception
 {

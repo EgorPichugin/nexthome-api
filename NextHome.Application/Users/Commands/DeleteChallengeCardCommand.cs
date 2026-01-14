@@ -1,5 +1,6 @@
 using MediatR;
 using NextHome.Core.Interfaces;
+using NextHome.Core.Interfaces.Repositories;
 
 namespace NextHome.Application.Users.Commands;
 

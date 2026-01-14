@@ -68,6 +68,16 @@ public interface IQdrantService
     /// <param name="cancellationToken">Token to cancel the transaction.</param>
     Task DeleteExperienceCard(ExperienceCardEntity card, string? collectionName,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes experience cards from Qdrant.
+    /// </summary>
+    /// <param name="cards">Array of <see cref="ExperienceCardEntity"/> that should be deleted.</param>
+    /// <param name="collectionName">Collection where the cards are stored.</param>
+    /// <param name="cancellationToken">Token to cancel the transaction.</param>
+    /// <returns>A task representing the asynchronous operation. The task completes once all specified experience cards are successfully deleted from Qdrant.`</returns>
+    Task DeleteExperienceCards(IReadOnlyCollection<ExperienceCardEntity> cards, string? collectionName,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -218,6 +228,23 @@ public sealed class QdrantService(
             "{Field} Deleting experience card failed",
             ["[QDRANT]:", card.Id]);
     }
+    
+    /// <inheritdoc />
+    public async Task DeleteExperienceCards(IReadOnlyCollection<ExperienceCardEntity> cards, string? collectionName,
+        CancellationToken cancellationToken = default)
+    {
+        collectionName ??= Constants.DefaultCollectionName;
+        var ids = cards.Select(card => card.Id).ToList();
+        await ExecuteAsync(
+            () => client.DeleteAsync(
+                collectionName: collectionName,
+                ids: ids,
+                cancellationToken: cancellationToken),
+            "{Field} Deleting  experience cards started",
+            "{Field} Deleting experience cards successfully deleted",
+            "{Field} Deleting experience cards failed",
+            ["[QDRANT]:", ids]);
+    }
 
     /// <summary>
     /// Generate embeddings for card description.
@@ -236,6 +263,16 @@ public sealed class QdrantService(
         return vector;
     }
 
+    /// <summary>
+    /// Executes an asynchronous action with logging for start, success, and error events.
+    /// </summary>
+    /// <typeparam name="T">Type of the result returned by the asynchronous action.</typeparam>
+    /// <param name="action">An asynchronous action to execute.</param>
+    /// <param name="startingLog">Log message to indicate the start of the action.</param>
+    /// <param name="successLog">Log message to indicate the successful completion of the action.</param>
+    /// <param name="errorLog">Log message to indicate an error occurred during the action.</param>
+    /// <param name="logArgs">Arguments to be included in the log messages.</param>
+    /// <returns>The result of the asynchronous action.</returns>
     private async Task<T> ExecuteAsync<T>(
         Func<Task<T>> action,
         string startingLog,
@@ -257,6 +294,15 @@ public sealed class QdrantService(
         }
     }
 
+    /// <summary>
+    /// Executes an asynchronous action with logging for start, success, and error events.
+    /// </summary>
+    /// <param name="action">An asynchronous action to execute.</param>
+    /// <param name="startingLog">Log message to indicate the start of the action.</param>
+    /// <param name="successLog">Log message to indicate the successful completion of the action.</param>
+    /// <param name="errorLog">Log message to indicate an error occurred during the action.</param>
+    /// <param name="logArgs">Arguments to be included in the log messages.</param>
+    /// <returns></returns>
     private async Task ExecuteAsync(
         Func<Task> action,
         string startingLog,

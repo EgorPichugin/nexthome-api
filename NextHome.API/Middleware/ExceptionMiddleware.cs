@@ -1,5 +1,6 @@
 using FluentValidation;
 using NextHome.Application.Common.Exceptions;
+using NextHome.Core.Exceptions;
 using ValidationException = NextHome.Application.Common.Exceptions.ValidationException;
 
 namespace NextHome.API.Middleware;
