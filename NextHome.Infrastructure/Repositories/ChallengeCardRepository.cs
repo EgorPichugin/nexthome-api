@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NextHome.Core.Entities;
 using NextHome.Core.Interfaces;
+using NextHome.Core.Interfaces.Repositories;
 using NextHome.Infrastructure.Persistence;
 
 namespace NextHome.Infrastructure.Repositories;
