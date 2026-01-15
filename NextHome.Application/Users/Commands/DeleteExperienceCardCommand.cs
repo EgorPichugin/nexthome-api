@@ -1,5 +1,6 @@
 using MediatR;
 using NextHome.Core.Interfaces;
+using NextHome.Core.Interfaces.Repositories;
 using NextHome.QdrantService;
 
 namespace NextHome.Application.Users.Commands;
@@ -42,7 +43,7 @@ public class DeleteExperienceCardCommandHandler(
         }
 
         await experienceCardRepository.Delete(command.CardId, cancellationToken);
-        await qdrantService.DeleteExperienceCard(card: card, null, cancellationToken:  cancellationToken);
+        await qdrantService.DeleteExperienceCard(card: card, collectionName: null, cancellationToken:  cancellationToken);
 
         return Unit.Value;
     }

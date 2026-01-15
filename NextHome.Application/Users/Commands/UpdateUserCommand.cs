@@ -4,6 +4,7 @@ using NextHome.Application.Common.Validation;
 using NextHome.Application.Common.Exceptions;
 using NextHome.Core.Enumerations;
 using NextHome.Core.Interfaces;
+using NextHome.Core.Interfaces.Repositories;
 
 namespace NextHome.Application.Users.Commands;
 
@@ -105,7 +106,8 @@ public class UpdateUserCommandHandler(
             response.Country,
             response.City,
             response.Status,
-            response.ImmigrationDate
+            response.ImmigrationDate,
+            response.IsEmailConfirmed
         );
     }
 }

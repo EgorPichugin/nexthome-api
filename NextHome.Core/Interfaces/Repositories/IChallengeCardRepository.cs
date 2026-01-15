@@ -1,6 +1,6 @@
 using NextHome.Core.Entities;
 
-namespace NextHome.Core.Interfaces;
+namespace NextHome.Core.Interfaces.Repositories;
 
 /// <summary>
 /// Repository interface for managing challenge card entities.

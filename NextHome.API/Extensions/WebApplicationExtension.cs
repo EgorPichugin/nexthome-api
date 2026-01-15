@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Options;
 using NextHome.API.Constants;
 using NextHome.API.Middleware;
+using NextHome.API.Options;
+using NextHome.Core.Interfaces;
 
 namespace NextHome.API.Extensions;
 
@@ -16,10 +18,14 @@ public static class WebApplicationExtension
     /// <returns>The configured WebApplication instance.</returns>
     public static WebApplication ConfigureApp(this WebApplication app)
     {
-        var envOptions = app.Services
-            .GetRequiredService<IOptions<EnvironmentOptions>>()
+        var swaggerOptions = app.Services
+            .GetRequiredService<IOptions<SwaggerOptions>>()
             .Value;
-        if (envOptions.EnableSwagger)
+        var corsOptions = app.Services
+            .GetRequiredService<IOptions<CorsOptions>>()
+            .Value;
+        
+        if (swaggerOptions.Enable)
         {
             app.UseSwagger();
             app.UseSwaggerUI(options =>
@@ -30,7 +36,7 @@ public static class WebApplicationExtension
 
         app.UseHttpsRedirection();
         app.UseRouting();
-        app.UseCors(envOptions.CorsPolicyName);
+        app.UseCors(corsOptions.PolicyName);
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseAuthentication();
         app.UseAuthorization();

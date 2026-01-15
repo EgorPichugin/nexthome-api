@@ -2,6 +2,8 @@ namespace NextHome.Core.Entities;
 
 public interface ICardEntity
 {
+    Guid Id { get; init; }
+    
     string Description { get; set; }
 }
 /// <summary>

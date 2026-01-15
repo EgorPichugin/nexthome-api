@@ -1,6 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NextHome.Application.Common.Validation;
 using NextHome.Application.Countries.Services;
+using NextHome.Application.Options;
+using NextHome.Core.Interfaces.Services;
+using NextHome.Infrastructure.Services;
 using OpenAI;
 using OpenAI.Moderations;
 

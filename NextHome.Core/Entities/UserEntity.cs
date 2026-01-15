@@ -66,4 +66,19 @@ public class UserEntity
     /// Challenge cards associated with the user.
     /// </summary>
     public ICollection<ChallengeCardEntity> ChallengeCards { get; init; } = [];
+
+    /// <summary>
+    /// Indicates whether the user's email is confirmed.
+    /// </summary>
+    public bool IsEmailConfirmed { get; set; } = false;
+
+    /// <summary>
+    /// Token used for email confirmation.
+    /// </summary>
+    public string? EmailConfirmationToken { get; set; }
+
+    /// <summary>
+    /// Expiry date and time of the email confirmation token.
+    /// </summary>
+    public DateTime? EmailConfirmationTokenExpiry { get; set; }
 }

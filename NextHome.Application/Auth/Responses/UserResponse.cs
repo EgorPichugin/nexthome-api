@@ -13,6 +13,7 @@ namespace NextHome.Application.Auth.Responses;
 /// <param name="City">The city where the user resides. This field is optional.</param>
 /// <param name="Status">The status of the user, defined by the <c>EStatus</c> enumeration. This field is optional.</param>
 /// <param name="ImmigrationDate">The date when the user immigrated. This field is optional.</param>
+/// <param name="IsEmailConfirmed">Indicates whether the user's email address has been confirmed.</param>
 public record UserResponse(
     Guid UserId,
     string Email,
@@ -21,5 +22,6 @@ public record UserResponse(
     string Country,
     string City,
     EStatus? Status,
-    DateTime? ImmigrationDate
+    DateTime? ImmigrationDate,
+    bool IsEmailConfirmed
 );

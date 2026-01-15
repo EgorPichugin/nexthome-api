@@ -1,19 +1,26 @@
 using System.ComponentModel.DataAnnotations;
+using NextHome.Core.Interfaces;
 
-namespace NextHome.QdrantService;
+namespace NextHome.QdrantService.Options;
 
+/// <summary>
+/// Configuration options for Qdrant service.
+/// </summary>
 public class QdrantOptions
 {
-    public const string Qdrant =  "Qdrant";
+    /// <summary>
+    /// Configuration section name.
+    /// </summary>
+    public const string SectionName =  "Qdrant";
     
     /// <summary>
-    /// Qdrant database host.
+    /// The host address of the Qdrant service.
     /// </summary>
     [Required(ErrorMessage = "Host is required")]
     public string Host { get; set; } = String.Empty;
 
     /// <summary>
-    /// Qdrant database port.
+    /// The port number of the Qdrant service.
     /// </summary>
     [Range(1, 65535, ErrorMessage = "Port must be between 1 and 65535")]
     public int Port { get; set; }

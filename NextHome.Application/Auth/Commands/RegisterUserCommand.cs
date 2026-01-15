@@ -5,6 +5,10 @@ using NextHome.Core.Interfaces;
 using NextHome.Application.Common.Validation;
 using NextHome.Application.Common.Exceptions;
 using NextHome.Core.Enumerations;
+using Microsoft.Extensions.Options;
+using NextHome.Application.Options;
+using NextHome.Core.Interfaces.Repositories;
+using NextHome.Core.Interfaces.Services;
 
 namespace NextHome.Application.Auth.Commands;
 
@@ -39,15 +43,23 @@ public record RegisterUserCommand(
 ) : IRequest<UserResponse>;
 
 /// <summary>
-/// Represents the command handler to register a new user.
+/// Handles the registration of a new user.
 /// </summary>
-public class RegisterCommandHandler(IUserRepository userRepository, IUserValidationService userValidationService) : IRequestHandler<RegisterUserCommand, UserResponse>
+/// <param name="userRepository">Repository for user data operations.</param>
+/// <param name="userValidationService">Service for validating user data.</param>
+/// <param name="tokenGenerator">Service for generating authentication tokens.</param>
+/// <param name="apiOptions">API configuration options.</param>
+/// <param name="emailSender">Service is responsible for sending emails.</param>
+public class RegisterCommandHandler(IUserRepository userRepository, 
+IUserValidationService userValidationService, ITokenGenerator tokenGenerator,
+IOptions<ApiOptions> apiOptions,
+IEmailSender emailSender) : IRequestHandler<RegisterUserCommand, UserResponse>
 {
     /// <inheritdoc/>
     public async Task<UserResponse> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
     {
         var errors = userValidationService.Validate(command.Request);
-        if (errors.Any())
+        if (errors.Count != 0)
         {
             throw new ValidationException(errors);
         }
@@ -70,8 +82,18 @@ public class RegisterCommandHandler(IUserRepository userRepository, IUserValidat
             City = command.Request.City.Trim(),
             Status = command.Request.Status,
             ImmigrationDate = command.Request.ImmigrationDate,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsEmailConfirmed = false
         };
+
+        var token = tokenGenerator.GenerateToken();
+        var hashedToken = tokenGenerator.HashToken(token);
+
+        user.EmailConfirmationToken = hashedToken;
+        user.EmailConfirmationTokenExpiry = DateTime.UtcNow.AddHours(24);
+
+        var link = $"{apiOptions.Value.BaseUrl}/users/confirm-email?token={Uri.EscapeDataString(token)}";
+        await emailSender.SendEmail(user.Email, "Confirm your registration", $"Confirm you account: \n{link}");
 
         var userEntity = await userRepository.Add(user, cancellationToken);
 
@@ -83,7 +105,8 @@ public class RegisterCommandHandler(IUserRepository userRepository, IUserValidat
             userEntity.Country,
             userEntity.City,
             userEntity.Status,
-            userEntity.ImmigrationDate
+            userEntity.ImmigrationDate,
+            userEntity.IsEmailConfirmed
         );
     }
 }

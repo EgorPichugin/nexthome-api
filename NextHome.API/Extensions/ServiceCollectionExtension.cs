@@ -12,6 +12,12 @@ using NextHome.Infrastructure.Repositories;
 using NextHome.QdrantService;
 using NextHome.QdrantService.Extensions;
 using OpenAI;
+using NextHome.Application;
+using NextHome.API.Options;
+using NextHome.Application.Options;
+using NextHome.Core.Interfaces.Repositories;
+using NextHome.Infrastructure.Options;
+using NextHome.QdrantService.Options;
 
 namespace NextHome.API.Extensions;
 
@@ -30,23 +36,22 @@ public static class ServiceCollectionExtension
         ConfigurationManager configuration)
     {
         // Add options
-        services.AddOptions<QdrantOptions>()
-            .Bind(configuration.GetSection(QdrantOptions.Qdrant))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        services.AddOptions<EnvironmentOptions>()
-            .Bind(configuration.GetSection(EnvironmentOptions.Environment))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+        services.AddOptionsWithValidation<CorsOptions>(CorsOptions.SectionName, configuration);
+        services.AddOptionsWithValidation<DatabaseOptions>(DatabaseOptions.SectionName, configuration);
+        services.AddOptionsWithValidation<OpenAiOptions>(OpenAiOptions.SectionName, configuration);
+        services.AddOptionsWithValidation<SwaggerOptions>(SwaggerOptions.SectionName, configuration);
+        services.AddOptionsWithValidation<JwtOptions>(JwtOptions.SectionName, configuration);
+        services.AddOptionsWithValidation<ApiOptions>(ApiOptions.SectionName, configuration);
+        services.AddOptionsWithValidation<QdrantOptions>(QdrantOptions.SectionName, configuration);
+        services.AddOptionsWithValidation<SmtpOptions>(SmtpOptions.SectionName, configuration);
 
         // Register OpenAI Client
         services.AddSingleton<OpenAIClient>(serviceProvider =>
         {
-            var environmentOptions = serviceProvider.GetRequiredService<IOptions<EnvironmentOptions>>().Value;
-            return new OpenAIClient(environmentOptions.OpenAiKey);
+            var environmentOptions = serviceProvider.GetRequiredService<IOptions<OpenAiOptions>>().Value;
+            return new OpenAIClient(environmentOptions.Key);
         });
-        
+
         // Register all classes as scoped
         var currentAssembly = AssemblyReference.CurrentAssembly;
         var applicationAssembly = Application.AssemblyReference.CurrentAssembly;
@@ -104,8 +109,8 @@ public static class ServiceCollectionExtension
         });
 
         // Infrastructure services
-        var envOptions = GetEnvironmentOptions(configuration);
-        services.AddInfrastructure(configuration, envOptions.DatabaseUrl);
+        var databaseOptions = GetOptions<DatabaseOptions>(configuration, DatabaseOptions.SectionName);
+        services.AddInfrastructure(databaseOptions.Url);
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IExperienceCardRepository, ExperienceCardRepository>();
         services.AddScoped<IChallengeCardRepository, ChallengeCardRepository>();
@@ -117,7 +122,7 @@ public static class ServiceCollectionExtension
         services.AddQdrant();
 
         // JWT
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        var jwtOptions = GetOptions<JwtOptions>(configuration, JwtOptions.SectionName);
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -128,12 +133,12 @@ public static class ServiceCollectionExtension
                     ValidateAudience = false,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)
+                        Encoding.UTF8.GetBytes(jwtOptions.Secret)
                     ),
                     ValidateLifetime = true
                 };
             });
-
+        
         return services;
     }
 
@@ -147,10 +152,10 @@ public static class ServiceCollectionExtension
     public static IServiceCollection ConfigureCors(this IServiceCollection services,
         ConfigurationManager configurationManager)
     {
-        var envOptions = GetEnvironmentOptions(configurationManager);
+        var envOptions = GetOptions<CorsOptions>(configurationManager, CorsOptions.SectionName);
         services.AddCors(options =>
         {
-            options.AddPolicy(envOptions.CorsPolicyName, policyBuilder =>
+            options.AddPolicy(envOptions.PolicyName, policyBuilder =>
             {
                 policyBuilder
                     .WithOrigins(envOptions.ClientUrl)
@@ -163,13 +168,35 @@ public static class ServiceCollectionExtension
     }
 
     /// <summary>
-    /// Retrieves values for environment options.
+    /// Gets the environment options from configuration.
     /// </summary>
-    /// <param name="configurationManager">Build configuration object.</param>
-    /// <returns>The <see cref="EnvironmentOptions"/> instance.</returns>
-    private static EnvironmentOptions GetEnvironmentOptions(ConfigurationManager configurationManager)
+    /// <typeparam name="T">Generic type parameter representing the options type.</typeparam>
+    /// <param name="configurationManager">Configuration manager instance.</param>
+    /// <param name="sectionName">The name of the configuration section.</param>
+    /// <returns>Options of type T from the specified configuration section.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the specified configuration section is not set.</exception>
+    private static T GetOptions<T>(ConfigurationManager configurationManager, string sectionName)
     {
-        return configurationManager.GetSection(EnvironmentOptions.Environment).Get<EnvironmentOptions>() ??
-                         throw new InvalidOperationException("Environment options not set.");
+        return configurationManager.GetSection(sectionName).Get<T>() ??
+                         throw new InvalidOperationException($"Configuration section '{sectionName}' not set.");
+    }
+
+    /// <summary>
+    /// Adds options with validation to the service collection.
+    /// </summary>
+    /// <typeparam name="TOption">Options type.</typeparam>
+    /// <param name="services">Service collection to which the options will be added.</param>
+    /// <param name="sectionName">Section name in the configuration.</param>
+    /// <param name="configuration">Configuration manager instance.</param>
+    private static void AddOptionsWithValidation<TOption>(
+        this IServiceCollection services,
+        string sectionName,
+        ConfigurationManager configuration)
+        where TOption : class, new()
+    {
+        services.AddOptions<TOption>()
+            .Bind(configuration.GetSection(sectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
     }
 }

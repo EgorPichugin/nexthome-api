@@ -17,7 +17,7 @@ public interface ICardRequest
 }
 
 /// <summary>
-/// Create card request contract.
+/// Create a card request contract.
 /// </summary>
 public interface ICreateCardRequest : ICardRequest;
 

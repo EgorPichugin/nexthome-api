@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NextHome.Core.Entities;
 using NextHome.Core.Interfaces;
+using NextHome.Core.Interfaces.Repositories;
 using NextHome.Infrastructure.Persistence;
 
 namespace NextHome.Infrastructure.Repositories;
@@ -55,6 +56,24 @@ public sealed class UserRepository(AppDbContext appDbContext) : IUserRepository
         appDbContext.Users.Update(userEntity);
         await appDbContext.SaveChangesAsync(cancellationToken);
     }
-
     
+    /// <inheritdoc/>
+    public async Task Delete(Guid id, CancellationToken cancellationToken = default)
+    {
+        var entity = await appDbContext.Users.FindAsync([id], cancellationToken);
+        if (entity != null)
+        {
+            appDbContext.Users.Remove(entity);
+            await appDbContext.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    /// <inheritdoc />
+    public Task<UserEntity?> GetByEmailConfirmationToken(string tokenHash, CancellationToken cancellationToken = default)
+    {
+        return appDbContext.Users.FirstOrDefaultAsync(
+            user => user.EmailConfirmationToken == tokenHash,
+            cancellationToken
+        );
+    }
 }

@@ -1,6 +1,6 @@
 using NextHome.Core.Entities;
 
-namespace NextHome.Core.Interfaces;
+namespace NextHome.Core.Interfaces.Repositories;
 
 /// <summary>
 /// Contract for a user repository.
@@ -53,4 +53,19 @@ public interface IUserRepository
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task Update(UserEntity userEntity, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes an existing user.
+    /// </summary>
+    /// <param name="userId">The ID of the user to delete.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    Task Delete(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a user entity by their email confirmation token.
+    /// </summary>
+    /// <param name="tokenHash">The hashed email confirmation token.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <returns>A task that represents the asynchronous operation, containing the user entity if found, or null if no user exists with the provided token.</returns>
+    Task<UserEntity?> GetByEmailConfirmationToken(string tokenHash, CancellationToken cancellationToken = default);
 }

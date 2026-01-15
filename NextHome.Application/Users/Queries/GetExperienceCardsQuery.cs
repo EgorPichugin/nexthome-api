@@ -1,6 +1,7 @@
 using MediatR;
 using NextHome.Application.Users.Responses;
 using NextHome.Core.Interfaces;
+using NextHome.Core.Interfaces.Repositories;
 
 namespace NextHome.Application.Users.Queries;
 
