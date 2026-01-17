@@ -68,11 +68,11 @@ public sealed class UserRepository(AppDbContext appDbContext) : IUserRepository
         }
     }
 
-    /// <inheritdoc />
-    public Task<UserEntity?> GetByEmailConfirmationToken(string tokenHash, CancellationToken cancellationToken = default)
+    /// <inheritdoc/>
+    public Task<UserEntity?> GetByAuthId(string authId, CancellationToken cancellationToken = default)
     {
         return appDbContext.Users.FirstOrDefaultAsync(
-            user => user.EmailConfirmationToken == tokenHash,
+            user => user.AuthId == authId,
             cancellationToken
         );
     }

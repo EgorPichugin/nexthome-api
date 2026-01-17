@@ -1,22 +1,16 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NextHome.API.Constants;
 using NextHome.Application.Extensions;
-using NextHome.Core.Interfaces;
-using NextHome.Infrastructure;
 using NextHome.Infrastructure.Extensions;
 using NextHome.Infrastructure.Repositories;
-using NextHome.QdrantService;
 using NextHome.QdrantService.Extensions;
 using OpenAI;
-using NextHome.Application;
 using NextHome.API.Options;
 using NextHome.Application.Options;
 using NextHome.Core.Interfaces.Repositories;
-using NextHome.Infrastructure.Options;
 using NextHome.QdrantService.Options;
 
 namespace NextHome.API.Extensions;
@@ -40,10 +34,8 @@ public static class ServiceCollectionExtension
         services.AddOptionsWithValidation<DatabaseOptions>(DatabaseOptions.SectionName, configuration);
         services.AddOptionsWithValidation<OpenAiOptions>(OpenAiOptions.SectionName, configuration);
         services.AddOptionsWithValidation<SwaggerOptions>(SwaggerOptions.SectionName, configuration);
-        services.AddOptionsWithValidation<JwtOptions>(JwtOptions.SectionName, configuration);
-        services.AddOptionsWithValidation<ApiOptions>(ApiOptions.SectionName, configuration);
+        services.AddOptionsWithValidation<Auth0Options>(Auth0Options.SectionName, configuration);
         services.AddOptionsWithValidation<QdrantOptions>(QdrantOptions.SectionName, configuration);
-        services.AddOptionsWithValidation<SmtpOptions>(SmtpOptions.SectionName, configuration);
 
         // Register OpenAI Client
         services.AddSingleton<OpenAIClient>(serviceProvider =>
@@ -60,6 +52,9 @@ public static class ServiceCollectionExtension
             .AddClasses()
             .AsImplementedInterfaces()
             .WithScopedLifetime());
+        
+        // HttpClient
+        services.AddHttpClient();
 
         // Add framework services.
         services.AddRouting();
@@ -122,22 +117,16 @@ public static class ServiceCollectionExtension
         services.AddQdrant();
 
         // JWT
-        var jwtOptions = GetOptions<JwtOptions>(configuration, JwtOptions.SectionName);
-        services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtOptions.Secret)
-                    ),
-                    ValidateLifetime = true
-                };
-            });
+        var authOptions = GetOptions<Auth0Options>(configuration, Auth0Options.SectionName);
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.Authority = authOptions.Authority;
+            options.Audience = authOptions.Audience;
+        });
         
         return services;
     }

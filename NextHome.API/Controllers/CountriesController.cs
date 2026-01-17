@@ -1,7 +1,5 @@
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NextHome.Application.Auth.Responses;
 using NextHome.Application.Countries.Queries;
 using NextHome.Application.Countries.Responses;
 

@@ -1,7 +1,7 @@
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NextHome.Application.Auth.Responses;
 using NextHome.Application.Users.Queries;
 using NextHome.Application.Users.Commands;
 using NextHome.Application.Users.Responses;
@@ -33,6 +33,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
 
     //TODO: make it available only for admin
+    [Authorize]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(
         [FromRoute] Guid id, CancellationToken cancellationToken)
@@ -42,6 +43,7 @@ public class UsersController(IMediator mediator) : ControllerBase
     }
     
     //TODO: make it available only for admin
+    [Authorize]
     [HttpDelete("by-email")]
     public async Task<IActionResult> DeleteByEmail(
         [FromQuery] string email,
@@ -51,14 +53,15 @@ public class UsersController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
-
-    [HttpGet("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail(
-        [FromQuery] string token,
-        CancellationToken cancellationToken)
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<UserResponse>> Me(CancellationToken cancellationToken)
     {
-        await mediator.Send(new ConfirmEmailCommand(token), cancellationToken);
-        return Ok();
+        var auth0Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (auth0Id == null) return Unauthorized();
+        
+        var response = await mediator.Send(new GetMeQuery(auth0Id), cancellationToken);
+        return Ok(response);
     }
     //endregion
     
