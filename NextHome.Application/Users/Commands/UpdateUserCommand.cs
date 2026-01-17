@@ -1,9 +1,8 @@
 using MediatR;
-using NextHome.Application.Auth.Responses;
 using NextHome.Application.Common.Validation;
 using NextHome.Application.Common.Exceptions;
-using NextHome.Core.Enumerations;
-using NextHome.Core.Interfaces;
+using NextHome.Application.Users.Responses;
+using NextHome.Application.Users.Services;
 using NextHome.Core.Interfaces.Repositories;
 
 namespace NextHome.Application.Users.Commands;
@@ -23,19 +22,11 @@ namespace NextHome.Application.Users.Commands;
 /// <param name="City">
 /// The city of residence of the user. This is a required parameter.
 /// </param>
-/// <param name="Status">
-/// The current status of the user within the system, represented as an enumeration. This parameter is optional.
-/// </param>
-/// <param name="ImmigrationDate">
-/// Specifies the date of immigration for the user, if applicable. This parameter is optional.
-/// </param>
 public record UpdateUserRequest(
     string FirstName,
     string LastName,
     string Country,
-    string City,
-    EStatus? Status = null,
-    DateTime? ImmigrationDate = null
+    string City
 );
 
 /// <summary>
@@ -53,19 +44,15 @@ public record UpdateUserCommand(
     UpdateUserRequest Request) : IRequest<UserResponse>;
 
 /// <summary>
-/// Handles the execution of the UpdateUserCommand, which is responsible for updating
-/// an existing user's information in the system.
+/// Handler for processing the UpdateUserCommand.
 /// </summary>
-/// <param name="userRepository">
-/// An instance of <see cref="IUserRepository"/> used to interact with the user data layer.
-/// </param>
-/// <param name="userValidationService">
-/// An instance of <see cref="IUserValidationService"/> used to validate the user's input data
-/// before updating the user record.
-/// </param>
+/// <param name="userRepository">User repository for accessing and modifying user data.</param>
+/// <param name="userValidationService">Service for validating user data.</param>
+/// <param name="userEntityMapper">Mapper for converting between user entities and responses.</param>
 public class UpdateUserCommandHandler(
     IUserRepository userRepository,
-    IUserValidationService userValidationService) : IRequestHandler<UpdateUserCommand, UserResponse>
+    IUserValidationService userValidationService,
+    IUserEntityMapper userEntityMapper) : IRequestHandler<UpdateUserCommand, UserResponse>
 {
     /// <inheritdoc/>
     public async Task<UserResponse> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
@@ -89,6 +76,7 @@ public class UpdateUserCommandHandler(
         user.LastName = command.Request.LastName;
         user.Country = command.Request.Country;
         user.City = command.Request.City;
+        user.IsProfileCompleted = true;
 
         await userRepository.Update(user, cancellationToken);
         var response = await userRepository.GetById(user.Id, cancellationToken);
@@ -98,16 +86,6 @@ public class UpdateUserCommandHandler(
             throw new InvalidOperationException("User not found");
         }
 
-        return new UserResponse(
-            response.Id,
-            response.Email,
-            response.FirstName,
-            response.LastName,
-            response.Country,
-            response.City,
-            response.Status,
-            response.ImmigrationDate,
-            response.IsEmailConfirmed
-        );
+        return userEntityMapper.MapUserEntityToResponse(response);
     }
 }

@@ -62,10 +62,10 @@ public interface IUserRepository
     Task Delete(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves a user entity by their email confirmation token.
+    /// Retrieves a user entity by their authentication ID.
     /// </summary>
-    /// <param name="tokenHash">The hashed email confirmation token.</param>
+    /// <param name="authId">The authentication ID of the user to retrieve.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
-    /// <returns>A task that represents the asynchronous operation, containing the user entity if found, or null if no user exists with the provided token.</returns>
-    Task<UserEntity?> GetByEmailConfirmationToken(string tokenHash, CancellationToken cancellationToken = default);
+    /// <returns>A task that represents the asynchronous operation, containing the user entity if found, or null if no user exists with the provided authentication ID.</returns>
+    Task<UserEntity?> GetByAuthId(string authId, CancellationToken cancellationToken = default);
 }

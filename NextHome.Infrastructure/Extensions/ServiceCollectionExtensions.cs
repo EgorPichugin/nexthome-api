@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NextHome.Core.Interfaces;
 using NextHome.Core.Interfaces.Services;
-using NextHome.Infrastructure.Options;
 using NextHome.Infrastructure.Persistence;
 using NextHome.Infrastructure.Services;
 
@@ -15,8 +12,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         string databaseUrl)
     {
-        services.AddScoped<ITokenGenerator, TokenGenerator>();
-        services.AddScoped<IEmailSender, SmtpEmailSender>();
+        services.AddScoped<IAuth0Manager, Auth0Manager>();
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(GetConnectionString(databaseUrl)));
 

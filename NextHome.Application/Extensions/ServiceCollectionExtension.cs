@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using NextHome.Application.Common.Validation;
 using NextHome.Application.Countries.Services;
 using NextHome.Application.Options;
+using NextHome.Application.Users.Services;
 using NextHome.Core.Interfaces.Services;
 using NextHome.Infrastructure.Services;
 using OpenAI;
@@ -19,6 +20,7 @@ public static class ServiceCollectionExtension
         services.AddScoped<IUserValidationService, UserValidationService>();
         services.AddScoped<ICardValidationService, CardValidationService>();
         services.AddScoped<IModerationService, ModerationService>();
+        services.AddSingleton<IUserEntityMapper, UserEntityMapper>();
 
         // Register OpenAI ModerationClient
         services.AddSingleton<ModerationClient>(serviceProvider =>
