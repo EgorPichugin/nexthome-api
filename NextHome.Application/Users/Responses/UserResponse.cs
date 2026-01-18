@@ -12,6 +12,7 @@ namespace NextHome.Application.Users.Responses;
 /// <param name="LastName">The last name of the user.</param>
 /// <param name="Country">The country where the user is based.</param>
 /// <param name="City">The city where the user resides. This field is optional.</param>
+/// <param name="AvatarUrl">The user avatar url.</param>
 public record UserResponse(
     Guid UserId,
     string Email,
@@ -19,5 +20,6 @@ public record UserResponse(
     string? FirstName,
     string? LastName,
     string? Country,
-    string? City
+    string? City,
+    string? AvatarUrl
 );

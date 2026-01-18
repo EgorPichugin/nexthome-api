@@ -38,7 +38,8 @@ public class UserEntityMapper : IUserEntityMapper
             FirstName: user.FirstName,
             LastName: user.LastName,
             Country: user.Country,
-            City: user.City);
+            City: user.City,
+            AvatarUrl: user.AvatarUrl);
     }
 
     /// <inheritdoc />

@@ -32,6 +32,17 @@ public class UsersController(IMediator mediator) : ControllerBase
         return Ok(response);
     }
 
+    [Authorize]
+    [HttpPut("{id:guid}/avatar")]
+    public async Task<ActionResult<UserResponse>> UpdateAvatar(
+        [FromRoute] Guid id,
+        [FromBody] UpdateUserAvatarRequest request,
+        CancellationToken cancellationToken)
+    {
+        var response = await mediator.Send(new UpdateUserAvatarCommand(id, request), cancellationToken);
+        return Ok(response);
+    }
+
     //TODO: make it available only for admin
     [Authorize]
     [HttpDelete("{id:guid}")]

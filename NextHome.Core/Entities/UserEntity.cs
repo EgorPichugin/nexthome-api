@@ -48,6 +48,11 @@ public class UserEntity
     public string? City { get; set; }
     
     /// <summary>
+    /// Url to user avatar picture.
+    /// </summary>
+    public string? AvatarUrl { get; set; }
+    
+    /// <summary>
     /// Verify whether the profile completed or not.
     /// </summary>
     public bool IsProfileCompleted { get; set; } = false;
